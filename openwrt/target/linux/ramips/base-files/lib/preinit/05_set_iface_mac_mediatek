@@ -1,0 +1,35 @@
+#
+# Copyright (C) 2009 OpenWrt.org
+#
+
+. /lib/ramips.sh
+
+preinit_set_mac_address() {
+	local part_name="Factory"
+	local lan_mac=""
+	local wan_mac=""
+	local lan_mac_offset=""
+	local wan_mac_offset=""
+
+	case $(ramips_board_name) in
+	mt7621*ax*)
+                #256k - 12 byte
+                lan_mac_offset="0x3FFF4"
+                wan_mac_offset="0x3FFFA"
+
+                ;;
+        *)
+                lan_mac_offset="0xE000"
+                wan_mac_offset="0xE006"
+                ;;
+        esac
+
+        lan_mac=$(mtd_get_mac_binary $part_name $lan_mac_offset)
+        wan_mac=$(mtd_get_mac_binary $part_name $wan_mac_offset)
+
+        [ -n "$lan_mac" ] && ifconfig eth0 hw ether "$lan_mac"
+        [ -n "$wan_mac" ] && ifconfig eth1 hw ether "$wan_mac"
+
+
+}
+boot_hook_add preinit_main preinit_set_mac_address

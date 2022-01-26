@@ -1,0 +1,43 @@
+diff --git a/net/ipv6/ip6_tunnel.c b/net/ipv6/ip6_tunnel.c
+index fd2655dc..4823e027 100644
+--- a/net/ipv6/ip6_tunnel.c
++++ b/net/ipv6/ip6_tunnel.c
+@@ -59,6 +59,7 @@
+ #include <net/inet_ecn.h>
+ #include <net/net_namespace.h>
+ #include <net/netns/generic.h>
++#include <net/netfilter/nf_hnat.h>
+ 
+ MODULE_AUTHOR("Ville Nuorvala");
+ MODULE_DESCRIPTION("IPv6 tunneling device");
+@@ -1668,6 +1669,22 @@ int ip6_tnl_get_iflink(const struct net_device *dev)
+ }
+ EXPORT_SYMBOL(ip6_tnl_get_iflink);
+ 
++static int ipip6_dev_hnat_check(struct hnat_hw_path *path)
++{
++
++	struct net_device *dev = path->real_dev;
++	struct ip6_tnl *tnl = netdev_priv(dev);
++
++	if (path->flags & HNAT_PATH_DSLITE)
++		return -EEXIST;
++
++	path->flags |= HNAT_PATH_DSLITE;
++	path->real_dev = tnl->dev;
++
++	return 0;
++
++}
++
+ static const struct net_device_ops ip6_tnl_netdev_ops = {
+ 	.ndo_init	= ip6_tnl_dev_init,
+ 	.ndo_uninit	= ip6_tnl_dev_uninit,
+@@ -1676,6 +1693,7 @@ static const struct net_device_ops ip6_tnl_netdev_ops = {
+ 	.ndo_change_mtu = ip6_tnl_change_mtu,
+ 	.ndo_get_stats	= ip6_get_stats,
+ 	.ndo_get_iflink = ip6_tnl_get_iflink,
++	.ndo_hnat_check = ipip6_dev_hnat_check,
+ };
+ 
+ 

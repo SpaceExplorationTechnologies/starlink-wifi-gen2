@@ -1,0 +1,145 @@
+diff -urN a/jffs2.c b/jffs2.c
+--- a/jffs2.c	2017-12-22 19:44:29.460810957 +0800
++++ b/jffs2.c	2017-12-22 19:43:55.944855098 +0800
+@@ -26,6 +26,7 @@
+ #include <dirent.h>
+ #include <unistd.h>
+ #include <endian.h>
++#include <mtd/mtd-user.h>
+ #include "jffs2.h"
+ #include "crc32.h"
+ #include "mtd.h"
+@@ -48,6 +49,44 @@
+ 
+ static void prep_eraseblock(void);
+ 
++static void pad_jffs2(int size, int datasize)
++{
++	if ((ofs % size == 0) && (ofs < erasesize))
++		return;
++
++	if (ofs < erasesize) {
++		memset(buf + ofs, 0xff, (size - (ofs % size)));
++		ofs += (size - (ofs % size));
++	}
++	ofs = ofs % erasesize;
++	if (ofs == 0) {
++		while (mtd_block_is_bad(outfd, mtdofs) && (mtdofs < mtdsize)) {
++			if (!quiet)
++				fprintf(stderr, "\nSkipping bad block at 0x%08x   ", mtdofs);
++
++			mtdofs += erasesize;
++
++			/* Move the file pointer along over the bad block. */
++			lseek(outfd, erasesize, SEEK_CUR);
++		}
++		mtd_erase_block(outfd, mtdofs);
++		if (writesize) {
++			int i;
++
++			for (i = 0; i < erasesize/writesize; i++) {
++				if (i * writesize < datasize)
++					write(outfd, buf + i * writesize, writesize);
++				else
++					lseek(outfd, writesize, SEEK_CUR);
++				mtdofs += writesize;
++			}
++		} else {
++			write(outfd, buf, erasesize);
++			mtdofs += erasesize;
++		}
++	}
++}
++
+ static void pad(int size)
+ {
+ 	if ((ofs % size == 0) && (ofs < erasesize))
+@@ -79,6 +118,17 @@
+ 	return erasesize - (ofs % erasesize);
+ }
+ 
++static int get_filesize(const char *name)
++{
++	struct stat st;
++
++	if (stat(name, &st)) {
++		fprintf(stderr, "File %s does not exist\n", name);
++		return;
++	}
++	return st.st_size;
++}
++
+ static inline void add_data(char *ptr, int len)
+ {
+ 	if (ofs + len > erasesize) {
+@@ -246,7 +296,10 @@
+ 	if (!last_ino)
+ 		last_ino = 1;
+ 	add_file(filename, target_ino);
+-	pad(erasesize);
++	if (mtdtype == MTD_NANDFLASH)
++		pad_jffs2(erasesize, get_filesize(filename));
++	else
++		pad(erasesize);
+ 
+ 	/* add eof marker, pad to eraseblock size and write the data */
+ 	add_data(JFFS2_EOF, sizeof(JFFS2_EOF) - 1);
+@@ -288,6 +341,7 @@
+ 	int err = -1, fdeof = 0;
+ 
+ 	outfd = mtd_check_open(mtd);
++
+ 	if (outfd < 0)
+ 		return -1;
+ 
+@@ -345,7 +399,10 @@
+ 		target_ino = add_dir(dir, 1);
+ 
+ 	add_file(filename, target_ino);
+-	pad(erasesize);
++	if (mtdtype == MTD_NANDFLASH)
++		pad_jffs2(erasesize, get_filesize(filename));
++	else
++		pad(erasesize);
+ 
+ 	/* add eof marker, pad to eraseblock size and write the data */
+ 	add_data(JFFS2_EOF, sizeof(JFFS2_EOF) - 1);
+diff -urN a/mtd.c b/mtd.c
+--- a/mtd.c	2017-12-22 19:44:48.982253170 +0800
++++ b/mtd.c	2017-12-22 19:47:37.493232718 +0800
+@@ -88,6 +88,7 @@
+ int no_erase;
+ int mtdsize = 0;
+ int erasesize = 0;
++int writesize = 0;
+ int jffs2_skip_bytes=0;
+ int mtdtype = 0;
+ 
+@@ -138,6 +139,7 @@
+ 	mtdsize = mtdInfo.size;
+ 	erasesize = mtdInfo.erasesize;
+ 	mtdtype = mtdInfo.type;
++	writesize = mtdInfo.writesize;
+ 
+ 	return fd;
+ }
+@@ -553,6 +555,7 @@
+ 	indicate_writing(mtd);
+ 
+ 	w = e = 0;
++	
+ 	for (;;) {
+ 		/* buffer may contain data already (from trx check or last mtd partition write attempt) */
+ 		while (buflen < erasesize) {
+diff -urN a/mtd.h b/mtd.h
+--- a/mtd.h	2017-12-22 19:44:55.982255676 +0800
++++ b/mtd.h	2017-12-22 19:44:11.962806079 +0800
+@@ -12,6 +12,8 @@
+ extern int quiet;
+ extern int mtdsize;
+ extern int erasesize;
++extern int writesize;
++extern int mtdtype;
+ 
+ extern int mtd_open(const char *mtd, bool block);
+ extern int mtd_check_open(const char *mtd);

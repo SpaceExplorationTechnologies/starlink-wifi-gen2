@@ -1,0 +1,393 @@
+#!/bin/sh /etc/rc.common
+# IPsec startup and shutdown script
+# Copyright (C) 1998, 1999, 2001  Henry Spencer.
+# Copyright (C) 2002			  Michael Richardson <mcr@freeswan.org>
+# 
+# This program is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by the
+# Free Software Foundation; either version 2 of the License, or (at your
+# option) any later version.  See <http://www.fsf.org/copyleft/gpl.txt>.
+# 
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+# or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# for more details.
+#
+#
+# ipsec		 init.d script for starting and stopping
+#			   the IPsec security subsystem (KLIPS and Pluto).
+#
+# This script becomes /etc/rc.d/init.d/ipsec (or possibly /etc/init.d/ipsec)
+# and is also accessible as "ipsec setup" (the preferred route for human
+# invocation).
+#
+# The startup and shutdown times are a difficult compromise (in particular,
+# it is almost impossible to reconcile them with the insanely early/late
+# times of NFS filesystem startup/shutdown).  Startup is after startup of
+# syslog and pcmcia support; shutdown is just before shutdown of syslog.
+#
+# chkconfig: 2345 47 76
+# description: IPsec provides encrypted and authenticated communications; \
+# KLIPS is the kernel half of it, Pluto is the user-level management daemon.
+
+START=60
+EXTRA_COMMANDS=status
+EXTRA_HELP="	status	Show the status of the service"
+
+# Format a list into a delimited string and print it
+config_list_delimit() {
+	local SECTION="$1"
+	local OPTION="$2"
+	local DELIMITER="${3:- }"
+
+	config_list_foreach "$SECTION" "$OPTION" "printf \"%s%s\"" "$DELIMITER" | sed "s/.\{${#DELIMITER}\}$//"
+}
+
+# Callback for each ipsec configuration section
+# Converts list options from UCI to ipsec format and writes ipsec section headers
+CUR_SECTION_NAME=
+CUR_SECTION_TYPE=
+config_cb() {
+	local TYPE="$1"
+	local NAME="$2"
+
+	# Handle list options from previous section
+	if [ "$CUR_SECTION_TYPE" = "ipsec_conn" ] ; then
+		local IKE="$(config_list_delimit "$CUR_SECTION_NAME" "ike" ", ")"
+		if [ -n "$IKE" ] ; then
+			printf "\tike=\"%s\"\n" "$IKE" >> "$IPSEC_UCI_CONF"
+		fi
+
+		local SUBNETS
+		local SPACE_PAT="* *"
+		config_get "SUBNETS" "$CUR_SECTION_NAME" "leftsubnets"
+		case "$SUBNETS" in
+			$SPACE_PAT)
+				printf "\tleftsubnets={ %s }\n" "$SUBNETS" >> "$IPSEC_UCI_CONF"
+				;;
+			?*)
+				printf "\tleftsubnet=%s\n" "$SUBNETS" >> "$IPSEC_UCI_CONF"
+				;;
+		esac
+
+		config_get "SUBNETS" "$CUR_SECTION_NAME" "rightsubnets"
+		case "$SUBNETS" in
+			$SPACE_PAT)
+				printf "\trightsubnets={ %s }\n" "$SUBNETS" >> "$IPSEC_UCI_CONF"
+				;;
+			?*)
+				printf "\trightsubnet=%s\n" "$SUBNETS" >> "$IPSEC_UCI_CONF"
+				;;
+		esac
+	elif [ "$CUR_SECTION_TYPE" = "ipsec_config" ] ; then
+		local VPRIV="$(config_list_delimit "$CUR_SECTION_NAME" "virtual_private" ",")"
+		if [ -n "$VPRIV" ] ; then
+			printf "\tvirtual_private=%s\n" "$VPRIV" >> "$IPSEC_UCI_CONF"
+		fi
+	fi
+
+	CUR_SECTION_NAME="$NAME"
+	CUR_SECTION_TYPE="$TYPE"
+
+	case "$CUR_SECTION_TYPE" in
+		ipsec_config|ipsec_conn)
+			# Handled in option_cb
+			echo >> "$IPSEC_UCI_CONF"
+			echo "${TYPE#ipsec_} $NAME" >> "$IPSEC_UCI_CONF"
+			;;
+		*)
+			# Not handled in option_cb
+			;;
+	esac
+
+	return 0
+}
+
+# Callback for each ipsec configuration option
+# Prints each UCI option to $IPSEC_UCI_CONF in ipsec.conf format
+option_cb() {
+	local NAME="$1"
+	local VALUE="$2"
+
+	case "$CUR_SECTION_TYPE" in
+		ipsec_config|ipsec_conn)
+			# Handle option in these sections
+			;;
+		*)
+			# Ignore options in all other sections
+			return 0
+			;;
+	esac
+
+	case "$NAME" in
+		modecfgdns_ITEM[0-9]*)
+			printf "\tmodecfgdns%d=%s\n" "${NAME##modecfgdns_ITEM}" "$VALUE" >> "$IPSEC_UCI_CONF"
+			;;
+		modecfgwins_ITEM[0-9]*)
+			printf "\tmodecfgwins%d=%s\n" "${NAME##modecfgwins_ITEM}" "$VALUE" >> "$IPSEC_UCI_CONF"
+			;;
+		*_ITEM[0-9]*|*_LENGTH)
+			# Ignore list items and length updates
+			;;
+		[!a-zA-Z]*)
+			# Ignore non-ipsec.conf parameters
+			;;
+		*)
+			# Quote values with characers which require quoting
+			if echo "$VALUE" | grep -q '^[[:alnum:]_%.]*$' ; then
+				printf "\t%s=%s\n" "$NAME" "$VALUE" >> "$IPSEC_UCI_CONF"
+			else
+				printf "\t%s=\"%s\"\n" "$NAME" "$VALUE" >> "$IPSEC_UCI_CONF"
+			fi
+			;;
+	esac
+
+	return 0
+}
+
+ipsec_config_convert() {
+	IPSEC_UCI_CONF="${IPSEC_UCI_CONF:-${IPSEC_CONFS:-/etc}/ipsec.uci.conf}"
+	ipsec_config_print_header
+	config_load "ipsec"
+	# Conversion for $IPSEC_UCI_CONF handled in section_cb and option_cb
+
+	IPSEC_SEC_UCI_CONF="${IPSEC_SEC_UCI_CONF:-${IPSEC_CONFS:-/etc}/ipsec.uci.secrets}"
+	ipsec_config_print_header_secret
+	echo >> "$IPSEC_SEC_UCI_CONF"
+	echo "# Certificate Secrets" >> "$IPSEC_SEC_UCI_CONF"
+	config_foreach "ipsec_config_add_secret_cs" "ipsec_secret_cs"
+	echo >> "$IPSEC_SEC_UCI_CONF"
+	echo "# Shared Secrets" >> "$IPSEC_SEC_UCI_CONF"
+	config_foreach "ipsec_config_add_secret_ss" "ipsec_secret_ss"
+	echo >> "$IPSEC_SEC_UCI_CONF"
+	echo "# XAUTH Secrets" >> "$IPSEC_SEC_UCI_CONF"
+	config_foreach "ipsec_config_add_secret_xs" "ipsec_secret_xs"
+}
+
+ipsec_config_print_header() {
+	cat > "$IPSEC_UCI_CONF" <<ENDHEADER
+# $IPSEC_UCI_CONF - UCI IPsec configuration file
+#
+# This file is automatically generated by the ipsec init script from
+# configuration information stored in UCI.  DO NOT EDIT THIS FILE BY HAND.
+ENDHEADER
+}
+
+ipsec_config_print_header_secret() {
+	cat > "$IPSEC_SEC_UCI_CONF" <<ENDHEADER
+# $IPSEC_SEC_UCI_CONF - UCI IPsec sensitive configuration file
+#
+# This file is automatically generated by the ipsec init script from
+# configuration information stored in UCI.  DO NOT EDIT THIS FILE BY HAND.
+ENDHEADER
+}
+
+ipsec_config_add_secret_cs() {
+	local SECTNAME="$1"
+
+	config_get "FILE" "$SECTNAME" "file"
+	config_get "SECRET" "$SECTNAME" "secret"
+
+	FILE="\"$FILE\""
+	if [ "$SECRET" != "%prompt" ] ; then
+		SECRET="\"$SECRET\""
+	fi
+
+	echo ": RSA $FILE $SECRET" >> "$IPSEC_SEC_UCI_CONF"
+}
+
+ipsec_config_add_secret_ss() {
+	local SECTNAME="$1"
+
+	config_get "INDICES" "$SECTNAME" "indices"
+	config_get "SECRET" "$SECTNAME" "secret"
+
+	echo "$INDICES : PSK \"$SECRET\"" >> "$IPSEC_SEC_UCI_CONF"
+}
+
+ipsec_config_add_secret_xs() {
+	local SECTNAME="$1"
+
+	config_get "USERNAME" "$SECTNAME" "username"
+	config_get "SECRET" "$SECTNAME" "secret"
+
+	echo "@$USERNAME : XAUTH \"$SECRET\"" >> "$IPSEC_SEC_UCI_CONF"
+}
+
+script_init() {
+	me='ipsec setup'		# for messages
+
+	# where the private directory and the config files are
+	IPSEC_EXECDIR="${IPSEC_EXECDIR-/usr/libexec/ipsec}"
+	IPSEC_LIBDIR="${IPSEC_LIBDIR-/usr/lib/ipsec}"
+	IPSEC_SBINDIR="${IPSEC_SBINDIR-/usr/sbin}"
+	IPSEC_CONFS="${IPSEC_CONFS-/etc}"
+
+	if test " $IPSEC_DIR" = " "	# if we were not called by the ipsec command
+	then
+		# we must establish a suitable PATH ourselves
+		PATH="${IPSEC_SBINDIR}":/sbin:/usr/sbin:/usr/local/bin:/bin:/usr/bin
+		export PATH
+
+		IPSEC_DIR="$IPSEC_LIBDIR"
+		export IPSEC_DIR IPSEC_CONFS IPSEC_LIBDIR IPSEC_EXECDIR
+	fi
+
+	# Check that the ipsec command is available.
+	found=
+	for dir in `echo $PATH | tr ':' ' '`
+	do
+		if test -f $dir/ipsec -a -x $dir/ipsec
+		then
+			found=yes
+			break			# NOTE BREAK OUT
+		fi
+	done
+	if ! test "$found"
+	then
+		echo "cannot find ipsec command -- \`$1' aborted" |
+			logger -s -p daemon.error -t ipsec_setup
+		exit 1
+	fi
+
+	# accept a few flags
+
+	export IPSEC_setupflags
+	IPSEC_setupflags=""
+
+	config=""
+
+	for dummy
+	do
+		case "$1" in
+		--showonly|--show)  IPSEC_setupflags="$1" ;;
+		--config)  config="--config $2" ; shift	;;
+		*) break ;;
+		esac
+		shift
+	done
+
+
+	# Pick up IPsec configuration (until we have done this, successfully, we
+	# do not know where errors should go, hence the explicit "daemon.error"s.)
+	# Note the "--export", which exports the variables created.
+	variables=`ipsec addconn $config --varprefix IPSEC --configsetup`
+	if [ $? != 0 ]
+	then
+		echo "Failed to parse config setup portion of ipsec.conf"
+		exit $?
+	fi
+	eval $variables
+
+	if test " $IPSEC_confreadstatus" != " "
+	then
+		case $1 in 
+		stop|--stop|_autostop) 
+		echo "$IPSEC_confreadstatus -- \`$1' may not work" |
+			logger -s -p daemon.error -t ipsec_setup;;
+			
+		*) echo "$IPSEC_confreadstatus -- \`$1' aborted" |
+			logger -s -p daemon.error -t ipsec_setup;
+		exit 1;;
+		esac
+	fi
+
+	IPSEC_confreadsection=${IPSEC_confreadsection:-setup}
+	export IPSEC_confreadsection
+
+	IPSECsyslog=${IPSECsyslog-daemon.error}
+	export IPSECsyslog
+
+	# misc setup
+	umask 022
+
+	mkdir -p /var/run/pluto
+}
+
+script_command() {
+	# do it
+	case "$1" in
+	start|--start|stop|--stop|_autostop|_autostart)
+		# remove for: @cygwin_START@ 
+		# portable way for checking for root
+		if [ ! -w / ]
+		then
+
+			echo "permission denied (must be superuser)" |
+				logger -s -p $IPSECsyslog -t ipsec_setup 2>&1
+			exit 1
+		fi
+		# remove for: @cygwin_END@
+		tmp=/var/run/pluto/ipsec_setup.st
+		outtmp=/var/run/pluto/ipsec_setup.out
+		(
+			ipsec _realsetup $1
+			echo "$?" >$tmp
+		) > ${outtmp} 2>&1
+		st=$?
+		if test -f $tmp
+		then
+			st=`cat $tmp`
+			rm -f $tmp
+		fi
+		if [ -f ${outtmp} ]; then
+			cat ${outtmp} | logger -s -p $IPSECsyslog -t ipsec_setup 2>&1
+			rm -f ${outtmp}
+		fi
+		;;
+
+	restart|--restart|force-reload)
+		$0 $IPSEC_setupflags stop
+		$0 $IPSEC_setupflags start
+		;;
+
+	_autorestart)			# for internal use only
+		$0 $IPSEC_setupflags _autostop
+		$0 $IPSEC_setupflags _autostart
+		;;
+
+	status|--status)
+		ipsec _realsetup $1
+		exit
+		;;
+
+	--version)
+		echo "$me $IPSEC_VERSION"
+		exit 0
+		;;
+
+	--help)
+		echo "Usage: $me [ --showonly ] {--start|--stop|--restart}"
+		echo "	   $me --status"
+		exit 0
+		;;
+
+	*)
+		echo "Usage: $me [ --showonly ] {--start|--stop|--restart}"
+		echo "	   $me --status"
+		exit 2
+	esac
+}
+start() {
+	ipsec_config_convert
+	script_init start "$@"
+	script_command start "$@"
+}
+
+stop() {
+	script_init stop "$@"
+	script_command stop "$@"
+}
+
+restart() {
+	ipsec_config_convert
+	script_init stop "$@"
+	script_command stop "$@"
+	script_command start "$@"
+}
+
+status() {
+	script_init status "$@"
+	ipsec _realsetup status
+}
+

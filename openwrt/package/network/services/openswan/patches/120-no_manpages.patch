@@ -1,0 +1,60 @@
+--- a/programs/_confread/Makefile
++++ b/programs/_confread/Makefile
+@@ -14,7 +14,6 @@
+ OPENSWANSRCDIR?=$(shell cd ../..; pwd)
+ include ${OPENSWANSRCDIR}/Makefile.inc
+ 
+-EXTRA5MAN=ipsec.conf.5
+ CONFFILES=ipsec.conf
+ EXCONFILES=ipsec.win2k.conf
+ SOURCEDIR=_confread
+@@ -24,11 +23,3 @@ CONFDFILES=clear clear-or-private privat
+ 
+ include ${srcdir}../Makefile.program
+ 
+-ipsec.conf.5: ${srcdir}ipsec.conf.5.xml
+-
+-${srcdir}ipsec.conf.5.xml: $(wildcard d.ipsec.conf/*.xml) ${srcdir}d.ipsec.conf/order.txt
+-	cd ${srcdir} && cat `cat ${srcdir}d.ipsec.conf/order.txt` >ipsec.conf.5.xml
+-
+-diff:	ipsec.conf.5.xml
+-	diff -B -w -u ipsec.conf.5.xml ipsec.conf.5.xml-ref
+-
+--- a/programs/pluto/Makefile
++++ b/programs/pluto/Makefile
+@@ -200,35 +200,11 @@ doinstall: all
+ 	$(INSTALL) $(INSTBINFLAGS) $(BINNAMEPLUTO) $(BINNAMEWHACK) $(LIBEXECDIR)
+ 	#$(INSTALL) $(INSTSUIDFLAGS) $(BINNAMEWHACKINIT) $(LIBEXECDIR)
+ 	if $(USE_ADNS) ; then $(INSTALL) $(INSTBINFLAGS) $(BINNAMEADNS)  $(LIBEXECDIR) ; fi
+-	$(INSTALL) $(INSTMANFLAGS) ${srcdir}pluto.8 $(PMANDIR)/ipsec_pluto.8
+-	sh ${OPENSWANSRCDIR}/packaging/utils/manlink ${srcdir}pluto.8 | \
+-		while read from to ; \
+-		do \
+-			ln -s -f ipsec_$$from $(PMANDIR)/$$to; \
+-		done
+-	$(INSTALL) $(INSTMANFLAGS) ${srcdir}ipsec.secrets.5 $(FMANDIR)
+-	sh ${OPENSWANSRCDIR}/packaging/utils/manlink ${srcdir}ipsec.secrets.5 | \
+-		while read from to ; \
+-		do \
+-		 ln -s -f $$from $(FMANDIR)/$$to; \
+-		done
+ 
+ install_file_list:
+ 	@echo $(LIBEXECDIR)/$(BINNAMEPLUTO)
+ 	@if $(USE_ADNS) ; then echo $(LIBDIR)/$(BINNAMEADNS) ; fi
+ 	@echo $(LIBEXECDIR)/$(BINNAMEWHACK)
+-	@echo $(PMANDIR)/ipsec_pluto.8
+-	@sh ${OPENSWANSRCDIR}/packaging/utils/manlink pluto.8 | \
+-		while read from to; \
+-		do\
+-			 echo $(PMANDIR)/$$to; \
+-		done
+-	@echo $(FMANDIR)/ipsec.secrets.5
+-	@sh ${OPENSWANSRCDIR}/packaging/utils/manlink ipsec.secrets.5 | \
+-		while read from to; \
+-		do \
+-			echo $(FMANDIR)/$$to; \
+-		done
+ 
+ alg_info_test: alg_info_test.o ike_alg.o constants.o defs.o log.o db_ops.o crypto.o $(LIBDESLITE) $(OPENSWANLIB)
+ 	$(CC) -o $@ $^ $(LDFLAGS) $(LIBSPLUTO)

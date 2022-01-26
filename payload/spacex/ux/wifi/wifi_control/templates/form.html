@@ -1,0 +1,46 @@
+<h1>CREATE NETWORK</h1>
+<div class="top-links">
+       <a href="/skip">Skip this step ></a>
+</div>
+
+{{if .SsidError}}
+<p class="animate error">Network name {{ .SsidError }}</p>
+{{end}}
+
+{{if .PasswordError}}
+<p class="animate error">Password {{ .PasswordError }}</p>
+{{end}}
+
+<form action="/setup" class="animate" method="post">
+       <input name="ssid"
+       id="ssid"
+       type="text"
+       {{ .BorderHighlight .SsidError }}
+       {{ .PopulateField .FormData.Ssid }}
+       placeholder="Enter WiFi Network Name">
+
+       <input name="password"
+       id="password"
+       type="text"
+       autocorrect="off"
+       autocapitalize="none"
+       {{ .BorderHighlight .PasswordError }}
+       {{ .PopulateField .FormData.Password }}
+       placeholder="Enter WiFi Password">
+
+       {{if .IsDev}}
+       <p class="animate">
+       <input name="enableMesh"
+                     id="enableMesh"
+                     type="checkbox"
+                     value="enabled">
+              <label for="enableMesh"> Set as mesh controller </label>
+       </p>
+       {{end}}
+
+       <button id="submit" type="submit" class="primary-button">Create</button>
+</form>
+
+<div class="regulatory-label-link"><a href="/regulatory-label">Starlink Router Regulatory Label ></a></div>
+{{if .IsDev}}<a id="mesh" href="/mesh-setup">Set as mesh repeater, join existing mesh network ></a>{{end}}
+

@@ -1,0 +1,123 @@
+diff -urN a/drivers/mtd/mtdcore.c b/drivers/mtd/mtdcore.c
+--- a/drivers/mtd/mtdcore.c	2018-01-09 10:01:38.396547000 +0800
++++ b/drivers/mtd/mtdcore.c	2018-01-29 09:41:32.761806000 +0800
+@@ -925,6 +925,27 @@
+ }
+ EXPORT_SYMBOL_GPL(mtd_get_unmapped_area);
+ 
++/* Learn total bad block number before access offs+len */
++int mtd_countbad(struct mtd_info *mtd, loff_t offs, unsigned int len)
++{
++	int bad = 0;
++	loff_t offset = 0;
++
++	while ((offs + len) > offset) {
++		if (mtd_block_isbad(mtd, offset) > 0) {
++			bad++;
++			offs += mtd->erasesize;
++		} else if (mtd_block_isbad(mtd, offset) < 0) {
++			pr_err("len should not be over partition end\n");
++			return bad;
++		}
++		offset += mtd->erasesize;
++	}
++
++	return bad;
++}
++EXPORT_SYMBOL_GPL(mtd_countbad);
++
+ int mtd_read(struct mtd_info *mtd, loff_t from, size_t len, size_t *retlen,
+ 	     u_char *buf)
+ {
+@@ -935,6 +956,12 @@
+ 	if (!len)
+ 		return 0;
+ 
++	if ((mtd->type == MTD_NANDFLASH) && !strcmp(mtd->name, "rootfs")) {
++		int bad = mtd_countbad(mtd, from, len);
++
++		from += bad * mtd->erasesize;
++	}
++
+ 	/*
+ 	 * In the absence of an error, drivers return a non-negative integer
+ 	 * representing the maximum number of bitflips that were corrected on
+diff -urN a/drivers/mtd/mtdsplit/mtdsplit.c b/drivers/mtd/mtdsplit/mtdsplit.c
+--- a/drivers/mtd/mtdsplit/mtdsplit.c	2018-01-09 10:01:25.801724000 +0800
++++ b/drivers/mtd/mtdsplit/mtdsplit.c	2018-01-29 09:41:17.835030000 +0800
+@@ -79,6 +79,10 @@
+ 	size_t retlen;
+ 	int ret;
+ 
++	if (mtd->type == MTD_NANDFLASH)
++		offset += mtd_countbad(mtd, offset, sizeof(magic)) *
++			  mtd->erasesize;
++
+ 	ret = mtd_read(mtd, offset, sizeof(magic), &retlen,
+ 		       (unsigned char *) &magic);
+ 	if (ret)
+diff -urN a/drivers/mtd/mtdsplit/mtdsplit_fit.c b/drivers/mtd/mtdsplit/mtdsplit_fit.c
+--- a/drivers/mtd/mtdsplit/mtdsplit_fit.c	2018-01-09 13:45:25.763656000 +0800
++++ b/drivers/mtd/mtdsplit/mtdsplit_fit.c	2018-01-11 10:37:57.126511000 +0800
+@@ -60,7 +60,14 @@
+ 
+ 	/* Parse the MTD device & search for the FIT image location */
+ 	for(offset = 0; offset < mtd->size; offset += mtd->erasesize) {
+-		ret = mtd_read(mtd, 0, hdr_len, &retlen, (void*) &hdr);
++	
++		if (mtd->type == MTD_NANDFLASH) {
++			ret = mtd_read(mtd, mtd_countbad(mtd, 0, hdr_len) *
++					mtd->erasesize, hdr_len, &retlen,
++					(void*) &hdr);
++		} else {
++			ret = mtd_read(mtd, 0, hdr_len, &retlen, (void*) &hdr);
++		}
+ 		if (ret) {
+ 			pr_err("read error in \"%s\" at offset 0x%llx\n",
+ 			       mtd->name, (unsigned long long) offset);
+@@ -101,6 +108,9 @@
+ 		return ret;
+ 	}
+ 
++	if (mtd->type == MTD_NANDFLASH)
++		rootfs_offset += mtd_countbad(mtd, 0, rootfs_offset) *
++				 mtd->erasesize;
+ 	rootfs_size = mtd->size - rootfs_offset;
+ 
+ 	parts = kzalloc(2 * sizeof(*parts), GFP_KERNEL);
+@@ -111,6 +121,10 @@
+ 	parts[0].offset = fit_offset;
+ 	parts[0].size = mtd_rounddown_to_eb(fit_size, mtd) + mtd->erasesize;
+ 
++	if (mtd->type == MTD_NANDFLASH)
++		parts[0].size += mtd_countbad(mtd, 0, parts[0].size) *
++				 mtd->erasesize;
++
+ 	parts[1].name = ROOTFS_PART_NAME;
+ 	parts[1].offset = rootfs_offset;
+ 	parts[1].size = rootfs_size;
+diff -urN a/drivers/mtd/mtdsplit/mtdsplit.h b/drivers/mtd/mtdsplit/mtdsplit.h
+--- a/drivers/mtd/mtdsplit/mtdsplit.h	2018-01-09 13:44:34.301391000 +0800
++++ b/drivers/mtd/mtdsplit/mtdsplit.h	2018-01-09 13:44:42.648259000 +0800
+@@ -40,6 +40,8 @@
+ 			 size_t *ret_offset,
+ 			 enum mtdsplit_part_type *type);
+ 
++extern int mtd_countbad(struct mtd_info *mtd, loff_t offs, unsigned int len);
++
+ #else
+ static inline int mtd_get_squashfs_len(struct mtd_info *master,
+ 				       size_t offset,
+diff -urN a/drivers/mtd/mtdsplit/mtdsplit_squashfs.c b/drivers/mtd/mtdsplit/mtdsplit_squashfs.c
+--- a/drivers/mtd/mtdsplit/mtdsplit_squashfs.c	2018-01-09 10:01:19.309812000 +0800
++++ b/drivers/mtd/mtdsplit/mtdsplit_squashfs.c	2018-01-09 15:39:41.872417000 +0800
+@@ -49,6 +49,9 @@
+ 	part->name = ROOTFS_SPLIT_NAME;
+ 	part->offset = mtd_roundup_to_eb(part_offset + squashfs_len,
+ 					 parent_mtd) - part_offset;
++	if (master->type == MTD_NANDFLASH)
++		part->offset += mtd_countbad(master, 0, part->offset) *
++				master->erasesize;
+ 	part->size = mtd_rounddown_to_eb(master->size - part->offset, master);
+ 
+ 	*pparts = part;

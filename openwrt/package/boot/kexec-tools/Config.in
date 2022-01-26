@@ -1,0 +1,21 @@
+menu "Configuration"
+	depends on PACKAGE_kexec-tools
+
+config KEXEC_TOOLS_kdump
+	bool
+	prompt "kdump support"
+	default n
+	help
+	  Include the kdump utility.
+
+config KEXEC_ZLIB
+	bool
+	prompt "zlib support"
+	default y
+
+config KEXEC_LZMA
+	bool
+	prompt "lzma support"
+	default n
+
+endmenu

@@ -1,0 +1,18 @@
+#!/bin/sh /etc/rc.common
+
+START=90
+
+SERVICE=telnetd
+
+start() {
+	if [ -f /usr/sbin/$SERVICE ]; then
+        	echo "run telnetd service......"
+        	service_start /usr/sbin/$SERVICE
+	fi
+}
+stop() {
+	if [ -f /usr/sbin/$SERVICE ]; then
+        	service_stop /usr/sbin/$SERVICE
+	fi
+}
+

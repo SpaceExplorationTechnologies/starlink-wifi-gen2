@@ -1,0 +1,72 @@
+#!/bin/sh
+
+. /lib/functions.sh
+. /lib/mediatek.sh
+. /lib/functions/uci-defaults.sh
+. /lib/functions/system.sh
+
+mediatek_setup_interfaces()
+{
+	local board="$1"
+
+	case $board in
+	mt7623)
+		ucidef_set_interface_lan "lan0 lan1 lan2 lan3"
+		ucidef_set_interface_wan wan
+		;;
+	mt7623-gphy)
+		ucidef_set_interface_lan "lan0 lan1 lan2 lan3"
+		ucidef_set_interface_wan eth1
+		;;
+	*-gmac1_only)
+		ucidef_set_interfaces_lan_wan "eth0.1" "eth0.2"
+		ucidef_add_switch "switch0" \
+			"0:lan" "1:lan" "2:lan" "3:lan" "4:lan" "5:wan" "6t@eth0"
+		;;
+	*)
+		ucidef_set_interfaces_lan_wan "eth0" "eth1"
+		ucidef_add_switch "switch0" \
+			"0:lan" "1:lan" "2:lan" "3:lan" "4:wan" "6@eth0" "5@eth1"
+		;;
+	esac
+}
+
+preinit_set_mac_address() {
+	local board="$1"
+	local part_name="Factory"
+	local lan_mac=""
+	local wan_mac=""
+	local lan_mac_offset=""
+	local wan_mac_offset=""
+
+	case $board in
+	mt7623*)
+		lan_mac_offset="0x1F800"
+		wan_mac_offset="0x1F806"
+		;;
+	mt7622*ax*)
+		#512k - 12 byte
+		lan_mac_offset="0x7FFF4"
+		wan_mac_offset="0x7FFFA"
+		;;
+	*)
+		lan_mac_offset="0x2A"
+		wan_mac_offset="0x24"
+		;;
+	esac
+
+	lan_mac=$(mtd_get_mac_binary $part_name $lan_mac_offset)
+	wan_mac=$(mtd_get_mac_binary $part_name $wan_mac_offset)
+
+	[ -n "$lan_mac" ] && ucidef_set_interface_macaddr "lan" "$lan_mac"
+	[ -n "$wan_mac" ] && ucidef_set_interface_macaddr "wan" "$wan_mac"
+
+}
+
+board_config_update
+board=$(mediatek_board_name)
+mediatek_setup_interfaces $board
+preinit_set_mac_address $board
+board_config_flush
+
+exit 0

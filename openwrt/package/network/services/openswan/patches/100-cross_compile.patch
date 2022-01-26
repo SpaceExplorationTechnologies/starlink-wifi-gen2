@@ -1,0 +1,26 @@
+--- a/programs/pluto/Makefile
++++ b/programs/pluto/Makefile
+@@ -66,10 +66,6 @@ CFLAGS+=-DALLOW_MICROSOFT_BAD_PROPOSAL
+ 
+ ALLFLAGS = $(CPPFLAGS) $(CFLAGS) ${CROSSFLAGS}
+ 
+-ifneq ($(LD_LIBRARY_PATH),)
+-LDFLAGS+=-L$(LD_LIBRARY_PATH)
+-endif
+-
+ LIBSADNS = $(OPENSWANLIB)
+ LIBSADNS += -lresolv # -lefence
+ 
+--- a/programs/Makefile.program
++++ b/programs/Makefile.program
+@@ -55,10 +55,6 @@ endif
+ 
+ CFLAGS+= ${WERROR}
+ 
+-ifneq ($(LD_LIBRARY_PATH),)
+-LDFLAGS=-L$(LD_LIBRARY_PATH)
+-endif
+-
+ ifeq ($(USE_DMALLOC),true)
+ CFLAGS+=-DDMALLOC
+ LIBS+= -ldmalloc

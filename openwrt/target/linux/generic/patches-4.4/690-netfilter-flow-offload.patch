@@ -1,0 +1,450 @@
+Index: linux-4.4.177/include/linux/netdevice.h
+===================================================================
+--- linux-4.4.177.orig/include/linux/netdevice.h	2019-09-12 10:43:42.657300571 +0800
++++ linux-4.4.177/include/linux/netdevice.h	2019-09-12 10:43:42.689300571 +0800
+@@ -776,6 +776,14 @@
+ 
+ typedef u16 (*select_queue_fallback_t)(struct net_device *dev,
+ 				       struct sk_buff *skb);
++struct flow_offload;
++struct flow_offload_hw_path;
++
++enum flow_offload_type {
++	FLOW_OFFLOAD_ADD	= 0,
++	FLOW_OFFLOAD_DEL,
++};
++
+ 
+ struct hnat_hw_path;
+ 
+@@ -1096,6 +1104,10 @@
+ 	struct rtnl_link_stats64* (*ndo_get_stats64)(struct net_device *dev,
+ 						     struct rtnl_link_stats64 *storage);
+ 	struct net_device_stats* (*ndo_get_stats)(struct net_device *dev);
++	bool			(*ndo_has_offload_stats)(const struct net_device *dev, int attr_id);
++	int			(*ndo_get_offload_stats)(int attr_id,
++							 const struct net_device *dev,
++							 void *attr_data);
+ 
+ 	int			(*ndo_vlan_rx_add_vid)(struct net_device *dev,
+ 						       __be16 proto, u16 vid);
+@@ -1208,6 +1220,11 @@
+ 	int			(*ndo_bridge_dellink)(struct net_device *dev,
+ 						      struct nlmsghdr *nlh,
+ 						      u16 flags);
++	int			(*ndo_flow_offload_check)(struct flow_offload_hw_path *path);
++	int			(*ndo_flow_offload)(enum flow_offload_type type,
++						    struct flow_offload *flow,
++						    struct flow_offload_hw_path *src,
++						    struct flow_offload_hw_path *dest);
+ 	int			(*ndo_change_carrier)(struct net_device *dev,
+ 						      bool new_carrier);
+ 	int			(*ndo_get_phys_port_id)(struct net_device *dev,
+Index: linux-4.4.177/include/linux/netfilter_ingress.h
+===================================================================
+--- linux-4.4.177.orig/include/linux/netfilter_ingress.h	2019-09-12 10:43:39.609300571 +0800
++++ linux-4.4.177/include/linux/netfilter_ingress.h	2019-09-12 10:43:42.689300571 +0800
+@@ -17,11 +17,16 @@
+ static inline int nf_hook_ingress(struct sk_buff *skb)
+ {
+ 	struct nf_hook_state state;
++	int ret;
+ 
+ 	nf_hook_state_init(&state, &skb->dev->nf_hooks_ingress,
+ 			   NF_NETDEV_INGRESS, INT_MIN, NFPROTO_NETDEV,
+ 			   skb->dev, NULL, NULL, dev_net(skb->dev), NULL);
+-	return nf_hook_slow(skb, &state);
++	ret = nf_hook_slow(skb, &state);
++	if(ret == 0)
++		ret = -1;
++
++	return ret;
+ }
+ 
+ static inline void nf_hook_ingress_init(struct net_device *dev)
+Index: linux-4.4.177/include/linux/skbuff.h
+===================================================================
+--- linux-4.4.177.orig/include/linux/skbuff.h	2019-09-12 10:43:42.661300571 +0800
++++ linux-4.4.177/include/linux/skbuff.h	2019-09-12 10:43:42.689300571 +0800
+@@ -2929,6 +2929,7 @@
+ int skb_shift(struct sk_buff *tgt, struct sk_buff *skb, int shiftlen);
+ void skb_scrub_packet(struct sk_buff *skb, bool xnet);
+ unsigned int skb_gso_transport_seglen(const struct sk_buff *skb);
++bool skb_gso_validate_mtu(const struct sk_buff *skb, unsigned int mtu);
+ struct sk_buff *skb_segment(struct sk_buff *skb, netdev_features_t features);
+ struct sk_buff *skb_vlan_untag(struct sk_buff *skb);
+ int skb_ensure_writable(struct sk_buff *skb, int write_len);
+Index: linux-4.4.177/include/net/ip6_route.h
+===================================================================
+--- linux-4.4.177.orig/include/net/ip6_route.h	2019-09-12 10:43:39.693300571 +0800
++++ linux-4.4.177/include/net/ip6_route.h	2019-09-12 10:43:42.689300571 +0800
+@@ -25,6 +25,8 @@
+ #include <linux/ip.h>
+ #include <linux/ipv6.h>
+ #include <linux/route.h>
++#include <net/addrconf.h>
++
+ 
+ #define RT6_LOOKUP_F_IFACE		0x00000001
+ #define RT6_LOOKUP_F_REACHABLE		0x00000002
+@@ -217,4 +219,26 @@
+ 	       ipv6_addr_equal(&a->rt6i_gateway, &b->rt6i_gateway) &&
+ 	       !lwtunnel_cmp_encap(a->dst.lwtstate, b->dst.lwtstate);
+ }
++
++static inline unsigned int ip6_dst_mtu_forward(const struct dst_entry *dst)
++{
++	unsigned int mtu;
++	struct inet6_dev *idev;
++
++	if (dst_metric_locked(dst, RTAX_MTU)) {
++		mtu = dst_metric_raw(dst, RTAX_MTU);
++		if (mtu)
++			return mtu;
++	}
++
++	mtu = IPV6_MIN_MTU;
++	rcu_read_lock();
++	idev = __in6_dev_get(dst->dev);
++	if (idev)
++		mtu = idev->cnf.mtu6;
++	rcu_read_unlock();
++
++	return mtu;
++}
++
+ #endif
+Index: linux-4.4.177/include/uapi/linux/netfilter/nf_conntrack_common.h
+===================================================================
+--- linux-4.4.177.orig/include/uapi/linux/netfilter/nf_conntrack_common.h	2019-09-12 10:43:39.813300571 +0800
++++ linux-4.4.177/include/uapi/linux/netfilter/nf_conntrack_common.h	2019-09-12 10:43:42.689300571 +0800
+@@ -91,6 +91,10 @@
+ 	/* Conntrack got a helper explicitly attached via CT target. */
+ 	IPS_HELPER_BIT = 13,
+ 	IPS_HELPER = (1 << IPS_HELPER_BIT),
++	/* Conntrack has been offloaded to flow table. */
++	IPS_OFFLOAD_BIT = 14,
++	IPS_OFFLOAD = (1 << IPS_OFFLOAD_BIT),
++
+ };
+ 
+ /* Connection tracking event types */
+Index: linux-4.4.177/net/core/skbuff.c
+===================================================================
+--- linux-4.4.177.orig/net/core/skbuff.c	2019-09-12 10:43:41.321300571 +0800
++++ linux-4.4.177/net/core/skbuff.c	2019-09-12 10:43:42.693300571 +0800
+@@ -84,6 +84,11 @@
+ int sysctl_max_skb_frags __read_mostly = MAX_SKB_FRAGS;
+ EXPORT_SYMBOL(sysctl_max_skb_frags);
+ 
++/* Set skb_shinfo(skb)->gso_size to this in case you want skb_segment to
++ * segment using its current segmentation instead.
++ */
++#define GSO_BY_FRAGS	0xFFFF
++
+ /**
+  *	skb_panic - private function for out-of-line support
+  *	@skb:	buffer
+@@ -4353,6 +4358,60 @@
+ }
+ EXPORT_SYMBOL_GPL(skb_gso_transport_seglen);
+ 
++/**
++ * skb_gso_size_check - check the skb size, considering GSO_BY_FRAGS
++ *
++ * There are a couple of instances where we have a GSO skb, and we
++ * want to determine what size it would be after it is segmented.
++ *
++ * We might want to check:
++ * -    L3+L4+payload size (e.g. IP forwarding)
++ * - L2+L3+L4+payload size (e.g. sanity check before passing to driver)
++ *
++ * This is a helper to do that correctly considering GSO_BY_FRAGS.
++ *
++ * @seg_len: The segmented length (from skb_gso_*_seglen). In the
++ *           GSO_BY_FRAGS case this will be [header sizes + GSO_BY_FRAGS].
++ *
++ * @max_len: The maximum permissible length.
++ *
++ * Returns true if the segmented length <= max length.
++ */
++static inline bool skb_gso_size_check(const struct sk_buff *skb,
++				      unsigned int seg_len,
++				      unsigned int max_len) {
++	const struct skb_shared_info *shinfo = skb_shinfo(skb);
++	const struct sk_buff *iter;
++
++	if (shinfo->gso_size != GSO_BY_FRAGS)
++		return seg_len <= max_len;
++
++	/* Undo this so we can re-use header sizes */
++	seg_len -= GSO_BY_FRAGS;
++
++	skb_walk_frags(skb, iter) {
++		if (seg_len + skb_headlen(iter) > max_len)
++			return false;
++	}
++
++	return true;
++}
++
++/**
++ * skb_gso_validate_mtu - Return in case such skb fits a given MTU
++ *
++ * @skb: GSO skb
++ * @mtu: MTU to validate against
++ *
++ * skb_gso_validate_mtu validates if a given skb will fit a wanted MTU
++ * once split.
++ */
++bool skb_gso_validate_mtu(const struct sk_buff *skb, unsigned int mtu)
++{
++	return skb_gso_size_check(skb, skb_gso_network_seglen(skb), mtu);
++}
++EXPORT_SYMBOL_GPL(skb_gso_validate_mtu);
++
+ static struct sk_buff *skb_reorder_vlan_header(struct sk_buff *skb)
+ {
+ 	int mac_len;
+Index: linux-4.4.177/net/ipv6/ip6_output.c
+===================================================================
+--- linux-4.4.177.orig/net/ipv6/ip6_output.c	2019-09-12 10:43:40.005300571 +0800
++++ linux-4.4.177/net/ipv6/ip6_output.c	2019-09-12 10:43:42.693300571 +0800
+@@ -346,27 +346,6 @@
+ 	return dst_output(net, sk, skb);
+ }
+ 
+-static unsigned int ip6_dst_mtu_forward(const struct dst_entry *dst)
+-{
+-	unsigned int mtu;
+-	struct inet6_dev *idev;
+-
+-	if (dst_metric_locked(dst, RTAX_MTU)) {
+-		mtu = dst_metric_raw(dst, RTAX_MTU);
+-		if (mtu)
+-			return mtu;
+-	}
+-
+-	mtu = IPV6_MIN_MTU;
+-	rcu_read_lock();
+-	idev = __in6_dev_get(dst->dev);
+-	if (idev)
+-		mtu = idev->cnf.mtu6;
+-	rcu_read_unlock();
+-
+-	return mtu;
+-}
+-
+ static bool ip6_pkt_too_big(const struct sk_buff *skb, unsigned int mtu)
+ {
+ 	if (skb->len <= mtu)
+Index: linux-4.4.177/net/netfilter/Kconfig
+===================================================================
+--- linux-4.4.177.orig/net/netfilter/Kconfig	2019-09-12 10:43:41.757300571 +0800
++++ linux-4.4.177/net/netfilter/Kconfig	2019-09-12 10:46:46.633074731 +0800
+@@ -562,8 +562,36 @@
+ 	  x_tables match/target extensions over the nf_tables
+ 	  framework.
+ 
++config NF_FLOW_TABLE_INET
++	tristate "Netfilter flow table mixed IPv4/IPv6 module"
++	depends on NF_FLOW_TABLE
++	help
++          This option adds the flow table mixed IPv4/IPv6 support.
++
++	  To compile it as a module, choose M here.
++
+ endif # NF_TABLES
+ 
++config NF_FLOW_TABLE
++	tristate "Netfilter flow table module"
++	depends on NETFILTER_INGRESS
++	depends on NF_CONNTRACK
++	default n
++	help
++	  This option adds the flow table core infrastructure.
++
++	  To compile it as a module, choose M here.
++
++config NF_FLOW_TABLE_NETLINK
++	tristate "Netfilter flow table netlink interface module"
++	depends on NF_FLOW_TABLE
++	select NETFILTER_NETLINK
++	default n
++	help
++	  This option adds flow table netlink interface.
++
++	  To compile it as a module, choose M here
++
+ config NETFILTER_XTABLES
+ 	tristate "Netfilter Xtables support (required for ip_tables)"
+ 	default m if NETFILTER_ADVANCED=n
+@@ -840,6 +868,15 @@
+ 	depends on NETFILTER_ADVANCED
+ 	select NETFILTER_XT_TARGET_CT
+ 
++config NETFILTER_XT_TARGET_FLOWOFFLOAD
++	tristate '"FLOWOFFLOAD" target support'
++	depends on NF_FLOW_TABLE
++	depends on NETFILTER_INGRESS
++	help
++	  This option adds a `FLOWOFFLOAD' target, which uses the nf_flow_offload
++	  module to speed up processing of packets by bypassing the usual
++	  netfilter chains
++
+ config NETFILTER_XT_TARGET_RATEEST
+ 	tristate '"RATEEST" target support'
+ 	depends on NETFILTER_ADVANCED
+Index: linux-4.4.177/net/netfilter/Makefile
+===================================================================
+--- linux-4.4.177.orig/net/netfilter/Makefile	2019-09-12 10:43:40.045300571 +0800
++++ linux-4.4.177/net/netfilter/Makefile	2019-09-12 10:43:42.693300571 +0800
+@@ -90,6 +90,14 @@
+ obj-$(CONFIG_NFT_MASQ)		+= nft_masq.o
+ obj-$(CONFIG_NFT_REDIR)		+= nft_redir.o
+ 
++# flow table infrastructure
++obj-$(CONFIG_NF_FLOW_TABLE)	+= nf_flow_table.o
++nf_flow_table-objs := nf_flow_table_core.o nf_flow_table_ip.o
++
++obj-$(CONFIG_NF_FLOW_TABLE_INET) += nf_flow_table_inet.o
++obj-$(CONFIG_NF_FLOW_TABLE_HW)	+= nf_flow_table_hw.o
++obj-$(CONFIG_NF_FLOW_TABLE_NETLINK)	+= nf_flow_table_netlink.o
++
+ # generic X tables 
+ obj-$(CONFIG_NETFILTER_XTABLES) += x_tables.o xt_tcpudp.o
+ 
+@@ -106,6 +114,7 @@
+ obj-$(CONFIG_NETFILTER_XT_TARGET_CONNSECMARK) += xt_CONNSECMARK.o
+ obj-$(CONFIG_NETFILTER_XT_TARGET_CT) += xt_CT.o
+ obj-$(CONFIG_NETFILTER_XT_TARGET_DSCP) += xt_DSCP.o
++obj-$(CONFIG_NETFILTER_XT_TARGET_FLOWOFFLOAD) += xt_FLOWOFFLOAD.o
+ obj-$(CONFIG_NETFILTER_XT_TARGET_HL) += xt_HL.o
+ obj-$(CONFIG_NETFILTER_XT_TARGET_HMARK) += xt_HMARK.o
+ obj-$(CONFIG_NETFILTER_XT_TARGET_LED) += xt_LED.o
+Index: linux-4.4.177/net/netfilter/core.c
+===================================================================
+--- linux-4.4.177.orig/net/netfilter/core.c	2019-09-12 10:43:40.045300571 +0800
++++ linux-4.4.177/net/netfilter/core.c	2019-09-12 10:43:42.693300571 +0800
+@@ -320,7 +320,9 @@
+ 				goto next_hook;
+ 			kfree_skb(skb);
+ 		}
+-	}
++	} else
++		ret = 0;
++
+ 	rcu_read_unlock();
+ 	return ret;
+ }
+Index: linux-4.4.177/net/netfilter/nf_conntrack_core.c
+===================================================================
+--- linux-4.4.177.orig/net/netfilter/nf_conntrack_core.c	2019-09-12 10:43:40.049300571 +0800
++++ linux-4.4.177/net/netfilter/nf_conntrack_core.c	2019-09-12 10:43:42.693300571 +0800
+@@ -774,6 +774,8 @@
+ 		hlist_nulls_for_each_entry_rcu(h, n, &net->ct.hash[hash],
+ 					 hnnode) {
+ 			tmp = nf_ct_tuplehash_to_ctrack(h);
++			if (test_bit(IPS_OFFLOAD_BIT, &tmp->status))
++				continue;
+ 			if (!test_bit(IPS_ASSURED_BIT, &tmp->status) &&
+ 			    !nf_ct_is_dying(tmp) &&
+ 			    atomic_inc_not_zero(&tmp->ct_general.use)) {
+Index: linux-4.4.177/net/netfilter/nf_conntrack_netlink.c
+===================================================================
+--- linux-4.4.177.orig/net/netfilter/nf_conntrack_netlink.c	2019-09-12 10:43:40.049300571 +0800
++++ linux-4.4.177/net/netfilter/nf_conntrack_netlink.c	2019-09-12 10:43:42.697300571 +0800
+@@ -1100,6 +1100,14 @@
+ 				    .len = NF_CT_LABELS_MAX_SIZE },
+ };
+ 
++static int ctnetlink_flush_iterate(struct nf_conn *ct, void *data)
++{
++	if (test_bit(IPS_OFFLOAD_BIT, &ct->status))
++		return 0;
++
++	return ctnetlink_filter_match(ct, data);
++}
++
+ static int ctnetlink_flush_conntrack(struct net *net,
+ 				     const struct nlattr * const cda[],
+ 				     u32 portid, int report)
+@@ -1112,7 +1120,7 @@
+ 			return PTR_ERR(filter);
+ 	}
+ 
+-	nf_ct_iterate_cleanup(net, ctnetlink_filter_match, filter,
++	nf_ct_iterate_cleanup(net, ctnetlink_flush_iterate, filter,
+ 			      portid, report);
+ 	kfree(filter);
+ 
+@@ -1158,6 +1166,11 @@
+ 
+ 	ct = nf_ct_tuplehash_to_ctrack(h);
+ 
++	if (test_bit(IPS_OFFLOAD_BIT, &ct->status)) {
++		nf_ct_put(ct);
++		return -EBUSY;
++	}
++
+ 	if (cda[CTA_ID]) {
+ 		u_int32_t id = ntohl(nla_get_be32(cda[CTA_ID]));
+ 		if (id != (u32)(unsigned long)ct) {
+Index: linux-4.4.177/net/netfilter/nf_conntrack_proto_tcp.c
+===================================================================
+--- linux-4.4.177.orig/net/netfilter/nf_conntrack_proto_tcp.c	2019-09-12 10:43:42.389300571 +0800
++++ linux-4.4.177/net/netfilter/nf_conntrack_proto_tcp.c	2019-09-12 10:43:42.697300571 +0800
+@@ -328,6 +328,8 @@
+ 	spin_lock_bh(&ct->lock);
+ 	state = ct->proto.tcp.state;
+ 	spin_unlock_bh(&ct->lock);
++	if (test_bit(IPS_OFFLOAD_BIT, &ct->status))
++		return;
+ 
+ 	seq_printf(s, "%s ", tcp_conntrack_names[state]);
+ }
+Index: linux-4.4.177/net/netfilter/nf_conntrack_standalone.c
+===================================================================
+--- linux-4.4.177.orig/net/netfilter/nf_conntrack_standalone.c	2019-09-12 10:43:42.329300571 +0800
++++ linux-4.4.177/net/netfilter/nf_conntrack_standalone.c	2019-09-12 10:43:42.697300571 +0800
+@@ -220,10 +220,12 @@
+ 	NF_CT_ASSERT(l4proto);
+ 
+ 	ret = -ENOSPC;
+-	seq_printf(s, "%-8s %u %-8s %u %ld ",
++	seq_printf(s, "%-8s %u %-8s %u ",
+ 		   l3proto->name, nf_ct_l3num(ct),
+-		   l4proto->name, nf_ct_protonum(ct),
+-		   timer_pending(&ct->timeout)
++		   l4proto->name, nf_ct_protonum(ct));
++
++	if (!test_bit(IPS_OFFLOAD_BIT, &ct->status))
++		seq_printf(s, "%ld ", timer_pending(&ct->timeout)
+ 		   ? (long)(ct->timeout.expires - jiffies)/HZ : 0);
+ 
+ 	if (l4proto->print_conntrack)
+@@ -251,7 +253,9 @@
+ 	if (seq_print_acct(s, ct, IP_CT_DIR_REPLY))
+ 		goto release;
+ 
+-	if (test_bit(IPS_ASSURED_BIT, &ct->status))
++	if (test_bit(IPS_OFFLOAD_BIT, &ct->status))
++		seq_printf(s, "[OFFLOAD] ");
++	else if (test_bit(IPS_ASSURED_BIT, &ct->status))
+ 		seq_printf(s, "[ASSURED] ");
+ 
+ 	if (seq_has_overflowed(s))
+Index: linux-4.4.177/include/uapi/linux/netfilter/nfnetlink.h
+===================================================================
+--- linux-4.4.177.orig/include/uapi/linux/netfilter/nfnetlink.h	2019-09-12 10:43:39.813300571 +0800
++++ linux-4.4.177/include/uapi/linux/netfilter/nfnetlink.h	2019-09-12 10:43:42.697300571 +0800
+@@ -57,7 +57,8 @@
+ #define NFNL_SUBSYS_CTHELPER		9
+ #define NFNL_SUBSYS_NFTABLES		10
+ #define NFNL_SUBSYS_NFT_COMPAT		11
+-#define NFNL_SUBSYS_COUNT		12
++#define NFNL_SUBSYS_FLOWTABLE		12
++#define NFNL_SUBSYS_COUNT		13
+ 
+ /* Reserved control nfnetlink messages */
+ #define NFNL_MSG_BATCH_BEGIN		NLMSG_MIN_TYPE

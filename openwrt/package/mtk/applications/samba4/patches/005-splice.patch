@@ -1,0 +1,60 @@
+Index: samba-4.0.24/source3/lib/recvfile.c
+===================================================================
+--- samba-4.0.24.orig/source3/lib/recvfile.c
++++ samba-4.0.24/source3/lib/recvfile.c
+@@ -137,7 +137,7 @@ static ssize_t default_sys_recvfile(int
+  * from the network in the case of return != -1.
+  */
+ 
+-
++#define MAX_SPLICE_SIZE	(64 * 1024)
+ ssize_t sys_recvfile(int fromfd,
+ 			int tofd,
+ 			off_t offset,
+@@ -164,6 +164,7 @@ ssize_t sys_recvfile(int fromfd,
+ 	 * implementation if recvfile splice fails. JRA.
+ 	 */
+ 
++#if 0
+ 	if (!try_splice_call) {
+ 		return default_sys_recvfile(fromfd,
+ 				tofd,
+@@ -175,12 +176,22 @@ ssize_t sys_recvfile(int fromfd,
+ 		try_splice_call = false;
+ 		return default_sys_recvfile(fromfd, tofd, offset, count);
+ 	}
++#endif
+ 
+ 	while (count > 0) {
+ 		int nread, to_write;
+ 
++		if (count > MAX_SPLICE_SIZE)
++			to_write = MAX_SPLICE_SIZE;
++		else
++			to_write = count;
++#if 0
+ 		nread = splice(fromfd, NULL, pipefd[1], NULL,
+ 			       MIN(count, 16384), SPLICE_F_MOVE);
++#else
++		nread = splice(fromfd, NULL, tofd, &splice_offset,
++				to_write, SPLICE_F_MOVE);
++#endif
+ 		if (nread == -1) {
+ 			if (errno == EINTR) {
+ 				continue;
+@@ -194,6 +205,7 @@ ssize_t sys_recvfile(int fromfd,
+ 			break;
+ 		}
+ 
++#if 0
+ 		to_write = nread;
+ 		while (to_write > 0) {
+ 			int thistime;
+@@ -205,6 +217,7 @@ ssize_t sys_recvfile(int fromfd,
+ 			}
+ 			to_write -= thistime;
+ 		}
++#endif
+ 
+ 		total_written += nread;
+ 		count -= nread;

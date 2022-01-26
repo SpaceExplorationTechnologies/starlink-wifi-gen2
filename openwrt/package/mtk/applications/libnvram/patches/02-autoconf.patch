@@ -1,0 +1,54 @@
+Index: libnvram-0.9.28/nvram.h
+===================================================================
+--- libnvram-0.9.28.orig/nvram.h	2017-08-08 11:24:00.694574000 +0800
++++ libnvram-0.9.28/nvram.h	2017-08-08 11:27:26.140850000 +0800
+@@ -1,7 +1,7 @@
+ #ifndef _NVRAM_H
+ #define _NVRAM_H 	1
+ 
+-#include <linux/autoconf.h>
++//#include <linux/autoconf.h>
+ 
+ #ifdef CONFIG_DUAL_IMAGE
+ #define UBOOT_NVRAM	0
+Index: libnvram-0.9.28/nvram_env.c
+===================================================================
+--- libnvram-0.9.28.orig/nvram_env.c	2017-08-08 11:24:00.696570000 +0800
++++ libnvram-0.9.28/nvram_env.c	2017-08-08 11:27:49.419433000 +0800
+@@ -9,7 +9,7 @@
+ #include "nvram_env.h"
+ #include "flash_api.h"
+ 
+-#include <linux/autoconf.h>
++//#include <linux/autoconf.h>
+ 
+ char libnvram_debug = 0;
+ #define LIBNV_PRINT(x, ...) do { if (libnvram_debug) printf("%s %d: " x, __FILE__, __LINE__, ## __VA_ARGS__); } while(0)
+Index: libnvram-0.9.28/nvram_socket_cli.c
+===================================================================
+--- libnvram-0.9.28.orig/nvram_socket_cli.c	2017-08-08 11:24:00.702574000 +0800
++++ libnvram-0.9.28/nvram_socket_cli.c	2017-08-08 11:28:28.118721000 +0800
+@@ -51,7 +51,7 @@
+ #include <sys/select.h>
+ #include <sys/time.h>
+ #include <sys/wait.h>
+-#include <linux/autoconf.h>
++//#include <linux/autoconf.h>
+ #include "nvram.h"
+ #include "nvram_env.h"
+ //#include "nvram_server.h"
+Index: libnvram-0.9.28/flash_api.c
+===================================================================
+--- libnvram-0.9.28.orig/flash_api.c	2017-08-08 11:24:00.686573000 +0800
++++ libnvram-0.9.28/flash_api.c	2017-08-08 11:29:27.732642000 +0800
+@@ -5,8 +5,8 @@
+ #include <unistd.h>
+ #include <sys/ioctl.h>
+ #include <linux/types.h>
+-#include "../../config/autoconf.h"
+-#include <linux/autoconf.h>
++//#include "../../config/autoconf.h"
++//#include <linux/autoconf.h>
+ 
+ #if defined (CONFIG_RALINK_RT6855A) || defined (CONFIG_RALINK_MT7621) || defined (CONFIG_ARCH_MT7623)
+ #define NO_WIFI_SOC

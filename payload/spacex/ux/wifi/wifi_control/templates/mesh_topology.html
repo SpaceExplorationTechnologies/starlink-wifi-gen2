@@ -1,0 +1,72 @@
+<!--TODO(SATSW-24742): Remove once app supports mesh. This is purely for convenient debugging of the mesh network topology.-->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mesh Topology</title>
+    <link rel="stylesheet" href="../static/css/layout.css">
+    <style>
+        body {
+            text-align: center;
+            padding: 40px 0px;
+        }
+
+        #visualization-form div {
+            display: inline-block;
+            cursor: pointer;
+        }
+
+        #visualization-form input, #visualization-form label {
+            cursor: pointer;
+        }
+
+        canvas {
+            cursor: move;
+        }
+    </style>
+</head>
+
+<body style="text-align: center; padding-top: 40px;">
+    <h1>Starlink V2 WiFi Mesh Runtime Topology</h1>
+
+    <div class="alert-message error" style="display:none">
+        <span><strong id="topoErrMsgDiv"></strong></span>
+    </div>
+
+    <h2>Select Visualization Method:</h2>
+    <form id="visualization-form">
+        <div>
+            <input type="radio" id="mtk" name="visualizer-choice" value="mtk"
+                checked>
+            <label for="mtk">MediaTek Topology Visualizer</label>
+        </div>
+        
+        <div>
+            <input type="radio" id="raw" name="visualizer-choice" value="raw">
+            <label for="raw">Raw Topology Data</label>
+        </div>
+    </form>
+
+    <div class="visualizer-container" id="mediatek-topology-visualizer-container" value="mtk">
+        <h2>MediaTek Topology Visualizer:</h2>
+
+        <div id="display_tree_vis" style="display:none"></div>
+        <div id="display_all_1905_dev_info_div" style="display:none"></div>
+    </div>
+
+    <div class="visualizer-container" id="raw-topology-data-container" value="raw" style="display: none;">
+        <h2>Raw Topology Data:</h2>
+        <textarea id="raw-topology-data" rows="20" cols="100">{{.Topology}}</textarea>
+    </div>
+
+    <script src="../static/js/mtk-vis.js"></script>
+    <script src="../static/js/mtk-monCon.js"></script>
+
+    <script src="../static/js/topology-merger.js"></script>
+
+    <script>
+        topoJSON.push(JSON.parse({{.Topology}}));
+    </script>
+
+    <script src="../static/js/topology-visualizer.js"></script>
+    </body>
+</html>

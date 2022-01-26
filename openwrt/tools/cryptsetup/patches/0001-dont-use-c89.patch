@@ -1,0 +1,11 @@
+--- a/Makefile.in
++++ b/Makefile.in
+@@ -901,7 +901,7 @@ tmpfilesd_DATA = $(am__append_5)
+ @PYTHON_CRYPTSETUP_TRUE@pycryptsetup_la_CPPFLAGS = $(AM_CPPFLAGS) $(PYTHON_CPPFLAGS) $(PYTHON_INCLUDES) -fno-strict-aliasing
+ @PYTHON_CRYPTSETUP_TRUE@pycryptsetup_la_LDFLAGS = -avoid-version -module -shared -export-dynamic
+ @PYTHON_CRYPTSETUP_TRUE@pycryptsetup_la_LIBADD = libcryptsetup.la $(PYTHON_LIBS)
+-@CRYPTO_INTERNAL_ARGON2_TRUE@libargon2_la_CFLAGS = $(AM_CFLAGS) -std=c89 -pthread -O3
++@CRYPTO_INTERNAL_ARGON2_TRUE@libargon2_la_CFLAGS = $(AM_CFLAGS) -pthread -O3
+ @CRYPTO_INTERNAL_ARGON2_TRUE@libargon2_la_CPPFLAGS = $(AM_CPPFLAGS) \
+ @CRYPTO_INTERNAL_ARGON2_TRUE@	-I lib/crypto_backend/argon2 \
+ @CRYPTO_INTERNAL_ARGON2_TRUE@	-I lib/crypto_backend/argon2/blake2

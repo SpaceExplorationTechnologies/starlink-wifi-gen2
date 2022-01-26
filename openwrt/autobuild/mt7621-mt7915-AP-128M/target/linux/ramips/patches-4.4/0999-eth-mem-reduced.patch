@@ -1,0 +1,43 @@
+diff -urN a/drivers/net/ethernet/mediatek/mtk_eth_soc.c b/drivers/net/ethernet/mediatek/mtk_eth_soc.c
+--- a/drivers/net/ethernet/mediatek/mtk_eth_soc.c	2019-10-28 19:53:32.941270828 +0800
++++ b/drivers/net/ethernet/mediatek/mtk_eth_soc.c	2019-10-28 19:56:22.528220128 +0800
+@@ -639,7 +639,7 @@
+ static int mtk_init_fq_dma(struct mtk_eth *eth)
+ {
+ 	dma_addr_t phy_ring_tail;
+-	int cnt = MTK_DMA_SIZE;
++	int cnt = 512;
+ 	dma_addr_t dma_addr;
+ 	int i;
+ 
+@@ -1372,6 +1372,9 @@
+ 	if (rx_flag == MTK_RX_FLAGS_HWLRO) {
+ 		rx_data_len = MTK_MAX_LRO_RX_LENGTH;
+ 		rx_dma_size = MTK_HW_LRO_DMA_SIZE;
++	} else if (rx_flag == MTK_RX_FLAGS_QDMA ) {
++		rx_data_len = ETH_DATA_LEN;
++		rx_dma_size = 16;		
+ 	} else {
+ 		rx_data_len = ETH_DATA_LEN;
+ 		rx_dma_size = MTK_DMA_SIZE;
+@@ -1788,7 +1791,7 @@
+ 			netdev_reset_queue(eth->netdev[i]);
+ 	if (eth->scratch_ring) {
+ 		dma_free_coherent(eth->dev,
+-				  MTK_DMA_SIZE * sizeof(struct mtk_tx_dma),
++				  512 * sizeof(struct mtk_tx_dma),
+ 				  eth->scratch_ring,
+ 				  eth->phy_scratch_ring);
+ 		eth->scratch_ring = NULL;
+diff -urN a/drivers/net/ethernet/mediatek/mtk_eth_soc.h b/drivers/net/ethernet/mediatek/mtk_eth_soc.h
+--- a/drivers/net/ethernet/mediatek/mtk_eth_soc.h	2019-10-28 19:53:35.741187463 +0800
++++ b/drivers/net/ethernet/mediatek/mtk_eth_soc.h	2019-10-28 19:54:04.060344220 +0800
+@@ -23,7 +23,7 @@
+ #define MTK_QDMA_PAGE_SIZE	2048
+ #define	MTK_MAX_RX_LENGTH	1536
+ #define MTK_TX_DMA_BUF_LEN	0x3fff
+-#define MTK_DMA_SIZE		2048
++#define MTK_DMA_SIZE		1024
+ #define MTK_NAPI_WEIGHT		64
+ #define MTK_MAC_COUNT		2
+ #define MTK_RX_ETH_HLEN		(VLAN_ETH_HLEN + VLAN_HLEN + ETH_FCS_LEN)

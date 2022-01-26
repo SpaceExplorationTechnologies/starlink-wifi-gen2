@@ -1,0 +1,19 @@
+Index: fstools-2016-12-04-84b530a7/block.c
+===================================================================
+--- fstools-2016-12-04-84b530a7.orig/block.c	2017-10-31 18:34:40.867026783 +0800
++++ fstools-2016-12-04-84b530a7/block.c	2017-10-31 18:39:16.417175783 +0800
+@@ -854,9 +854,13 @@
+ 	int i, err;
+ 	size_t mount_opts_len;
+ 	char *mount_opts = NULL, *ptr;
++	char _data[128] = {0};
++	if (strstr(fstype, "fat") || strstr(fstype, "ntfs")) {
++		snprintf(_data, sizeof(_data), "%s", "iocharset=utf8,uid=65534,gid=65534");
++	}
+ 
+ 	err = mount(source, target, fstype, m ? m->flags : 0,
+-	            (m && m->options) ? m->options : "");
++	            (m && m->options) ? m->options : _data);
+ 
+ 	/* Requested file system type is not available in kernel,
+ 	   attempt to call mount helper. */

@@ -1,0 +1,26 @@
+# This file is interpreted as shell script.
+# Put your custom iptables rules here, they will
+# be executed with each firewall (re-)start.
+
+# Internal uci firewall chains are flushed and recreated on reload, so
+# put custom rules into the root chains e.g. INPUT or FORWARD or into the
+# special user chains, e.g. input_wan_rule or postrouting_lan_rule.
+
+add_miniupnpd_chain(){
+	WAN_IF=`uci -q get network.wan.ifname`
+
+	iptables -t nat -F MINIUPNPD 1>/dev/null 2>&1
+	iptables -t nat -D PREROUTING -i $WAN_IF -j MINIUPNPD 1>/dev/null 2>&1
+	iptables -t nat -X MINIUPNPD 1>/dev/null 2>&1
+	iptables -t filter -F MINIUPNPD 1>/dev/null 2>&1
+	iptables -t filter -D FORWARD -i  $WAN_IF  ! -o  $WAN_IF  -j MINIUPNPD 1>/dev/null 2>&1
+	iptables -t filter -X MINIUPNPD 1>/dev/null 2>&1
+
+	iptables -t nat -N MINIUPNPD
+	iptables -t nat -A PREROUTING -i $WAN_IF -m comment --comment "!fw_user: user chain for MINIUPNPD" -j MINIUPNPD
+	iptables -t filter -N MINIUPNPD
+	iptables -t filter -A FORWARD -i $WAN_IF ! -o $WAN_IF -m comment --comment "!fw_user: user chain for MINIUPNPD" -j MINIUPNPD
+}
+
+add_miniupnpd_chain
+

@@ -1,0 +1,116 @@
+Index: iptables-1.6.2/extensions/libxt_FLOWOFFLOAD.c
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ iptables-1.6.2/extensions/libxt_FLOWOFFLOAD.c	2019-12-13 15:28:07.894963999 +0800
+@@ -0,0 +1,88 @@
++#include <stdio.h>
++#include <string.h>
++#include <xtables.h>
++#include <linux/netfilter/xt_FLOWOFFLOAD.h>
++
++enum {
++	O_HW,
++	O_DIR,
++};
++
++enum {
++	DIR_ORIGIN,
++	DIR_REPLY,
++};
++
++static void offload_help(void)
++{
++	printf(
++		"FLOWOFFLOAD target options:\n"
++		" --hw				Enable hardware offload\n"
++	);
++}
++
++static const struct xt_option_entry offload_opts[] = {
++	{.name = "hw", .id = O_HW, .type = XTTYPE_NONE},
++	{.name = "dir", .id = O_DIR, .type = XTTYPE_STRING},
++	XTOPT_TABLEEND,
++};
++
++static void offload_parse(struct xt_option_call *cb)
++{
++	struct xt_flowoffload_target_info *info = cb->data;
++
++	xtables_option_parse(cb);
++	switch (cb->entry->id) {
++	case O_HW:
++		info->flags |= XT_FLOWOFFLOAD_HW;
++		break;
++	case O_DIR:
++		if (!strcmp(cb->arg, "origin"))
++			info->dir = 1 << DIR_ORIGIN;
++		else if (!strcmp(cb->arg, "reply"))
++			info->dir = 1 << DIR_REPLY;
++		else
++			printf("dir value wrong, pls select from \'origin\' and \'reply\'\n");
++		break;
++	}
++}
++
++static void offload_print(const void *ip, const struct xt_entry_target *target, int numeric)
++{
++	const struct xt_flowoffload_target_info *info =
++		(const struct xt_flowoffload_target_info *)target->data;
++
++	printf(" FLOWOFFLOAD");
++	if (info->flags & XT_FLOWOFFLOAD_HW)
++		printf(" hw");
++}
++
++static void offload_save(const void *ip, const struct xt_entry_target *target)
++{
++	const struct xt_flowoffload_target_info *info =
++		(const struct xt_flowoffload_target_info *)target->data;
++
++	if (info->flags & XT_FLOWOFFLOAD_HW)
++		printf(" --hw");
++}
++
++static struct xtables_target offload_tg_reg[] = {
++	{
++		.family		= NFPROTO_UNSPEC,
++		.name		= "FLOWOFFLOAD",
++		.revision	= 0,
++		.version	= XTABLES_VERSION,
++		.size		= XT_ALIGN(sizeof(struct xt_flowoffload_target_info)),
++		.userspacesize	= sizeof(struct xt_flowoffload_target_info),
++		.help		= offload_help,
++		.print		= offload_print,
++		.save		= offload_save,
++		.x6_parse	= offload_parse,
++		.x6_options	= offload_opts,
++	},
++};
++
++void _init(void)
++{
++	xtables_register_targets(offload_tg_reg, ARRAY_SIZE(offload_tg_reg));
++}
+Index: iptables-1.6.2/include/linux/netfilter/xt_FLOWOFFLOAD.h
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ iptables-1.6.2/include/linux/netfilter/xt_FLOWOFFLOAD.h	2019-12-13 13:31:59.110963999 +0800
+@@ -0,0 +1,18 @@
++/* SPDX-License-Identifier: GPL-2.0 WITH Linux-syscall-note */
++#ifndef _XT_FLOWOFFLOAD_H
++#define _XT_FLOWOFFLOAD_H
++
++#include <linux/types.h>
++
++enum {
++	XT_FLOWOFFLOAD_HW	= 1 << 0,
++
++	XT_FLOWOFFLOAD_MASK	= XT_FLOWOFFLOAD_HW
++};
++
++struct xt_flowoffload_target_info {
++	__u32 flags;
++	__u32 dir;
++};
++
++#endif /* _XT_FLOWOFFLOAD_H */

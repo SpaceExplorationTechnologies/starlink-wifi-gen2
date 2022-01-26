@@ -1,0 +1,35 @@
+<!doctype html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<link rel="shortcut icon" href="static/favicon.ico">
+	<title>Starlink</title>
+
+    <link rel="stylesheet" type="text/css" href="static/css/layout.css" media="screen">
+
+    <meta name="viewport" content="width=device-width, maximum-scale=1.0, user-scalable=1">
+</head>
+<body>
+	<div class="wrapper">
+		<div class="section">
+            {{ template "logo.html" . }}
+            {{ range .Messages}}
+				<p class="animate"><strong>{{.}}</strong></p>
+			{{ else }}
+                <h1>JOIN NETWORK</h1>
+                <p>Reconnect to your network using your new WiFi network name{{ if ne .Password "" }} and password{{ end }}.</p>
+			    <div class="network-detail">
+				    <div class="label">NETWORK NAME</div>
+				    <div class="value">{{.Ssid}}</div>
+			    </div>
+			    {{ if ne .Password "" }}
+			    <div class="network-detail">
+				    <div class="label">PASSWORD</div>
+				    <div class="value">{{.Password}}</div>
+			    </div>
+			    {{ end }}
+            {{ end }}
+		</div>
+	</div>
+</body>
+</html>

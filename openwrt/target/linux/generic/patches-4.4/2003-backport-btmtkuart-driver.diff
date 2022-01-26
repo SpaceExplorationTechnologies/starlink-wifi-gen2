@@ -1,0 +1,28 @@
+--- a/drivers/bluetooth/Kconfig
++++ b/drivers/bluetooth/Kconfig
+@@ -320,4 +320,15 @@ config BT_WILINK
+ 	  Say Y here to compile support for Texas Instrument's WiLink7 driver
+ 	  into the kernel or say M to compile it as module (btwilink).
+ 
++config BT_MTKUART
++	tristate "MediaTek HCI UART driver"
++	depends on SERIAL_DEV_BUS
++	help
++	  MediaTek Bluetooth HCI UART driver.
++	  This driver is required if you want to use MediaTek Bluetooth
++	  with serial interface.
++
++	  Say Y here to compile support for MediaTek Bluetooth UART devices
++	  into the kernel or say M to compile it as module (btmtkuart).
++
+ endmenu
+--- a/drivers/bluetooth/Makefile
++++ b/drivers/bluetooth/Makefile
+@@ -20,6 +20,7 @@ obj-$(CONFIG_BT_ATH3K)		+= ath3k.o
+ obj-$(CONFIG_BT_MRVL)		+= btmrvl.o
+ obj-$(CONFIG_BT_MRVL_SDIO)	+= btmrvl_sdio.o
+ obj-$(CONFIG_BT_WILINK)		+= btwilink.o
++obj-$(CONFIG_BT_MTKUART)	+= btmtkuart.o
+ obj-$(CONFIG_BT_BCM)		+= btbcm.o
+ obj-$(CONFIG_BT_RTL)		+= btrtl.o
+ obj-$(CONFIG_BT_QCA)		+= btqca.o

@@ -1,0 +1,25 @@
+Index: samba-4.0.24/source3/configure.in
+===================================================================
+--- samba-4.0.24.orig/source3/configure.in      2014-01-07 16:02:57.000000000 +0800
++++ samba-4.0.24/source3/configure.in   2017-12-13 14:48:52.916132000 +0800
+@@ -4695,6 +4695,7 @@
+ #include <rpc/nettype.h>
+ #endif
+ #include <rpc/xdr.h>
++#error openwrt forged a librpc!
+ ],[clnt_create("", RQUOTAPROG, RQUOTAVERS, "udp");],
+                   samba_cv_HAVE_NFS_QUOTAS=yes, samba_cv_HAVE_NFS_QUOTAS=no)])
+
+Index: samba-4.0.24/source3/configure
+===================================================================
+--- samba-4.0.24.orig/source3/configure 2017-12-13 14:48:52.816126000 +0800
++++ samba-4.0.24/source3/configure      2017-12-13 14:56:10.192894000 +0800
+@@ -34262,6 +34262,7 @@
+ #ifdef HAVE_RPC_NETTYPE_H
+ #include <rpc/nettype.h>
+ #endif
++#error openwrt forged a librpc!
+ #include <rpc/xdr.h>
+
+ int
+

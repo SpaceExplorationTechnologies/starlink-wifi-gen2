@@ -1,0 +1,508 @@
+<!doctype html> <html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>Starlink Config Portal</title>
+    <link rel="shortcut icon" href="static/favicon.ico">
+
+    <style>
+        body {
+            min-height: 180vh;
+            background-color: #0a0a0a;
+            background: linear-gradient(#0a0a0a, #353535);
+            color: #FFF;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+        }
+
+        .wrapper {
+            display: flex;
+            flex-direction: column;
+            max-width: 650px;
+            min-width: 450px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .logo {
+            height: 40px;
+        }
+
+        .title {
+            font-family: "Roboto", "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            font-weight: 100;
+            font-size: 24px;
+            padding-top: 10px;
+        }
+
+        input:not([type=checkbox]):not([type=radio]) {
+            padding: 8px 10px;
+            background: #4a4a4a;
+            border: 1px solid #FFFFFF80;
+            border-radius: 4px;
+            color: #FFF;
+            width: 250px;
+        }
+
+        input[type="checkbox"] {
+            width: 20px;
+            flex-grow: 0;
+        }
+
+        .input-field {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .label {
+            color: #CCC;
+        }
+
+        .setup-fields {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            margin: 25px 0 25px;
+            color: #FFF;
+        }
+
+        .actions {
+            display: flex;
+            flex-direction: row;
+            justify-content: flex-end;
+            align-items: center;
+            margin-top: 15px;
+        }
+
+        .warning {
+            font-size: 12px;
+            margin-right: 20px;
+        }
+
+        .primary-button {
+            background: #505050;
+            color: #FFF;
+            padding: 10px 40px;
+            text-transform: uppercase;
+            align-self: flex-end;
+            cursor: pointer;
+        }
+
+        .separator {
+            display: block;
+            height: 1px;
+            border: 0;
+            border-top: 1px solid #fff;
+            margin: 1em 0;
+            padding: 0;
+        }
+    </style>
+</head>
+<body>
+<div class="wrapper">
+    <div class="header">
+        <p class="title">Configure WiFi Router</p>
+        <svg class="logo" x="0px" y="0px" viewBox="0 0 460 115">
+            <clippath id="mask_x1">
+                <circle cx="275" cy="85" r="200"/>
+            </clippath>
+            <clippath id="mask_x2">
+                <circle cx="230" cy="90" r="80"/>
+            </clippath>
+            <g id="logo-shape">
+                <g id="x1" clip-path="url(#mask_x1)">
+                    <path class="logo_x"
+                          d="M168.4,112.2l-3.9,3.8h34.5C292,22.6,425.9,6,460,3.2l0-0.1C273.9,13.8,187.9,93.4,168.4,112.2"
+                          fill="white"/>
+                </g>
+                <g id="x2" clip-path="url(#mask_x2)">
+                    <path class="logo_x" d="M263.2,116h34.1l-47.2-34.8c-5.7,3.9-11.6,8.3-17.2,12.7L263.2,116z"
+                          fill="white"/>
+                    <path class="logo_x" d="M200.9,44.6h-34.1l40,29.3c5.8-3.9,12.5-8.1,18.7-11.7L200.9,44.6z"
+                          fill="white"/>
+                </g>
+            </g>
+        </svg>
+    </div>
+
+
+    <form action="/config" class="animate" method="post">
+        <div class="input-field">
+            <div class="label">Network Name:</div>
+            <input name="networkName"
+                   id="networkName"
+                   type="text"
+                   autocorrect="off"
+                   autocapitalize="none"
+                   value="{{ .NetworkName }}">
+        </div>
+
+        <div class="input-field">
+            <div class="label">Network Name 5Ghz:</div>
+            <input name="networkName5Ghz"
+                   id="networkName5Ghz"
+                   type="text"
+                   autocorrect="off"
+                   autocapitalize="none"
+                   value="{{ .NetworkName5Ghz }}">
+        </div>
+
+        <div class="input-field">
+            <div class="label">Password:</div>
+            <input name="password"
+                   id="password"
+                   type="text"
+                   autocorrect="off"
+                   autocapitalize="none"
+                   value="{{ .Password }}">
+        </div>
+
+        <div class="input-field">
+            <div class="label">WifiSecurity:</div>
+            <div>
+                <input type="radio" id="wpa2" name="wifiSecurity" value="WPA2" {{if eq .WifiSecurity "WPA2"}}checked{{end}}>
+                <label for="wpa2">WPA2</label><br>
+                <input type="radio" id="wpa2wpa3" name="wifiSecurity" value="WPA2WPA3" {{if eq .WifiSecurity "WPA2WPA3"}}checked{{end}}>
+                <label for="wpa2wpa3">WPA2 / WPA3</label><br>
+                <input type="radio" id="wpa3" name="wifiSecurity" value="WPA3" {{if eq .WifiSecurity "WPA3"}}checked{{end}}>
+                <label for="wpa3">WPA3</label><br>
+            </div>
+        </div>
+        <div class="input-field">
+            <div class="label">Mac Address LAN:</div>
+            <input name="macLan"
+                   id="macLan"
+                   type="text"
+                   autocorrect="off"
+                   autocapitalize="none"
+                   value="{{ .MacLan }}">
+        </div>
+
+        <div class="input-field">
+            <div class="label">Mac Address LAN 2Ghz:</div>
+            <input name="macLan2Ghz"
+                   id="macLan2Ghz"
+                   type="text"
+                   autocorrect="off"
+                   autocapitalize="none"
+                   value="{{ .MacLan2Ghz }}">
+        </div>
+
+        <div class="input-field">
+            <div class="label">Mac Address LAN 5Ghz:</div>
+            <input name="macLan5Ghz"
+                   id="macLan5Ghz"
+                   type="text"
+                   autocorrect="off"
+                   autocapitalize="none"
+                   value="{{ .MacLan5Ghz }}">
+        </div>
+
+        <div class="input-field">
+            <div class="label">LAN IPv4:</div>
+            <input name="lanIpv4"
+                   id="lanIpv4"
+                   type="text"
+                   autocorrect="off"
+                   autocapitalize="none"
+                   value="{{ .LanIpv4 }}">
+        </div>
+        
+        <div class="setup-fields">
+            <div>
+            <input name="setupComplete"
+                   id="setupComplete"
+                   type="checkbox"
+                   {{ if .SetupComplete }}checked{{ end }}
+                   value="complete">
+            <label for="setupComplete"> Setup Complete </label>
+            </div>
+            <div>
+            <input name="disable2ghz"
+                   id="disable2ghz"
+                   type="checkbox"
+                   {{ if .Disable2Ghz }}checked{{ end }}
+                   value="enabled">
+            <label for="disable2ghz"> Disable 2.4ghz Network</label>
+            </div>
+            <div>
+            <input name="disable5ghz"
+                   id="disable5ghz"
+                   type="checkbox"
+                   {{ if .Disable5Ghz }}checked{{ end }}
+                   value="enabled">
+            <label for="disable5ghz"> Disable 5ghz Network</label>
+            </div>
+            {{ if eq .Board "v2" }}
+            <div>
+            <input name="disableHidden"
+                   id="disableHidden"
+                   type="checkbox"
+                   {{ if .DisableHidden }}checked{{ end }}
+                   value="enabled">
+            <label for="disableHidden"> Disable Hidden Network</label>
+            </div>
+            {{end}}
+        </div>
+        <div class="input-field">
+            <div class="label">2.4Ghz Channel (0 for Auto):</div>
+            <input name="channel2Ghz"
+                   id="channel2Ghz"
+                   type="text"
+                   autocorrect="off"
+                   autocapitalize="none"
+                   value="{{ .Channel2Ghz }}">
+        </div>
+        <div class="input-field">
+            <div class="label">5Ghz Channel (0 for Auto):</div>
+            <input name="channel5Ghz"
+                   id="channel5Ghz"
+                   type="text"
+                   autocorrect="off"
+                   autocapitalize="none"
+                   value="{{ .Channel5Ghz }}">
+        </div>
+        <div class="input-field">
+            <div class="label">CountryCode:</div>
+            <input name="countryCode"
+                   id="countryCode"
+                   type="text"
+                   autocorrect="off"
+                   autocapitalize="none"
+                   value="{{ .CountryCode }}">
+        </div>
+        {{ if eq .Board "v2" }}
+        <div class="input-field">
+            <div class="label">HTBandwidth:</div>
+            <select name="htBandwidth" id="htBandwidth">
+              <option value="0" {{if eq .HtBandwidth "0"}}selected="selected"{{end}}>20Mhz</option>
+              <option value="1" {{if eq .HtBandwidth "1"}}selected="selected"{{end}}>20/40Mhz</option>
+            </select>
+        </div>
+        <div class="input-field">
+            <div class="label">VHTBandwidth:</div>
+            <select name="vhtBandwidth" id="vhtBandwidth">
+              <option value="0" {{if eq .VhtBandwidth "0"}}selected="selected"{{end}}>Disable</option>
+              <option value="1" {{if eq .VhtBandwidth "1"}}selected="selected"{{end}}>80M</option>
+              <option value="2" {{if eq .VhtBandwidth "2"}}selected="selected"{{end}}>160M</option>
+              <option value="3" {{if eq .VhtBandwidth "3"}}selected="selected"{{end}}>80M+80M</option>
+            </select>
+        </div>
+        <div class="input-field">
+            <div class="label">WirelessMode 2.4Ghz:</div>
+            <select name="wirelessMode2Ghz" id="wirelessMode2Ghz">
+              <option value="0" {{if eq .WirelessMode2Ghz "0"}}selected="selected"{{end}}>b/g</option>
+              <option value="1" {{if eq .WirelessMode2Ghz "1"}}selected="selected"{{end}}>b</option>
+              <option value="2" {{if eq .WirelessMode2Ghz "2"}}selected="selected"{{end}}>a</option>
+              <option value="4" {{if eq .WirelessMode2Ghz "4"}}selected="selected"{{end}}>g</option>
+              <option value="6" {{if eq .WirelessMode2Ghz "6"}}selected="selected"{{end}}>n</option>
+              <option value="7" {{if eq .WirelessMode2Ghz "7"}}selected="selected"{{end}}>gn</option>
+              <option value="8" {{if eq .WirelessMode2Ghz "8"}}selected="selected"{{end}}>an</option>
+              <option value="9" {{if eq .WirelessMode2Ghz "9"}}selected="selected"{{end}}>bgn</option>
+            </select>
+        </div>
+        <div class="input-field">
+            <div class="label">WirelessMode 5Ghz:</div>
+            <select name="wirelessMode5Ghz" id="wirelessMode5Ghz">
+              <option value="0" {{if eq .WirelessMode5Ghz "0"}}selected="selected"{{end}}>b/g</option>
+              <option value="1" {{if eq .WirelessMode5Ghz "1"}}selected="selected"{{end}}>b</option>
+              <option value="2" {{if eq .WirelessMode5Ghz "2"}}selected="selected"{{end}}>a</option>
+              <option value="4" {{if eq .WirelessMode5Ghz "4"}}selected="selected"{{end}}>g</option>
+              <option value="7" {{if eq .WirelessMode5Ghz "7"}}selected="selected"{{end}}>gn</option>
+              <option value="8" {{if eq .WirelessMode5Ghz "8"}}selected="selected"{{end}}>an</option>
+              <option value="9" {{if eq .WirelessMode5Ghz "9"}}selected="selected"{{end}}>bgn</option>
+              <option value="11" {{if eq .WirelessMode5Ghz "11"}}selected="selected"{{end}}>n</option>
+              <option value="14" {{if eq .WirelessMode5Ghz "14"}}selected="selected"{{end}}>A/AN/AC</option>
+              <option value="15" {{if eq .WirelessMode5Ghz "15"}}selected="selected"{{end}}>AN/AC</option>
+            </select>
+        </div>
+        <div class="input-field">
+            <div class="label">Enable Mesh:</div>
+            <div>
+                <input type="radio" id="meshEnabled" name="enableMesh" value="meshEnabled" {{if .EnableMesh}}checked{{end}}>
+                <label for="meshEnabled">Enable</label><br>
+                <input type="radio" id="meshDisabled" name="enableMesh" value="meshDisabled" {{if not .EnableMesh}}checked{{end}}>
+                <label for="meshDisabled">Disable</label><br>
+            </div>
+        </div>
+        <div class="input-field">
+            <div class="label">Is Repeater:</div>
+            <div>
+                <input type="radio" id="router" name="isRepeater" value="router" {{if not .IsRepeater}}checked{{end}}>
+                <label for="router">Router</label><br>
+                <input type="radio" id="repeater" name="isRepeater" value="repeater" {{if .IsRepeater}}checked{{end}}>
+                <label for="repeater">Repeater</label><br>
+            </div>
+        </div>
+        <div class="input-field">
+            <div class="label">New Peer IDs:</div>
+            <input name="newPeerIds"
+                id="newPeerIds"
+                type="text"
+                autocorrect="off"
+                autocapitalize="none"
+                value="{{ .NewPeerIds }}">
+        </div>
+        <div class="input-field">
+            <div class="label">Trusted Peer IDs:</div>
+            <input name="trustedPeerIds"
+                id="trustedPeerIds"
+                type="text"
+                autocorrect="off"
+                autocapitalize="none"
+                value="{{ .TrustedPeerIds }}">
+        </div>
+        <div class="input-field">
+            <div class="label">Distrusted Peer IDs:</div>
+            <input name="distrustedPeerIds"
+                id="distrustedPeerIds"
+                type="text"
+                autocorrect="off"
+                autocapitalize="none"
+                value="{{ .DistrustedPeerIds }}">
+        </div>
+        {{ end }}
+
+        <div class="actions">
+            <div class="warning">
+                Submit may take up to 30 seconds to reconfigure the device
+            </div>
+            <button type="submit" class="primary-button" value="configSubmit" name="submit">Update</button>
+        </div>
+    </form>
+
+{{ if eq .Board "v2" }}
+    <div class="separator"/>
+    <form action="/config" class="animate" method="post">
+        <div class="header">
+            <p class="title">EMS testing</p>
+        </div>
+
+        <div class="input-field">
+            <div class="label">State</div>
+            <div>
+                <input type="radio" id="testStateOff" name="testState" value="0" {{if eq .Test.State "0"}}checked{{end}}>
+                <label for="testStateOff">Off</label><br>
+                <input type="radio" id="testStateOn" name="testState" value="1" {{if eq .Test.State "1"}}checked{{end}}>
+                <label for="testStateOn">On</label><br>
+            </div>
+        </div>
+        <div class="input-field">
+            <div class="label">Band</div>
+            <div>
+                <input type="radio" id="testBand0" name="testBand" value="0" {{if eq .Test.Band "0"}}checked{{end}}>
+                <label for="testBand0">2.4Ghz</label><br>
+                <input type="radio" id="testBand1" name="testBand" value="1" {{if eq .Test.Band "1"}}checked{{end}}>
+                <label for="testBand1">5Ghz</label><br>
+            </div>
+        </div>
+
+        <div class="input-field">
+            <div class="label">TX Mode:</div>
+            <input name="testTXMode"
+                   id="testTXMode"
+                   type="text"
+                   autocorrect="off"
+                   autocapitalize="none"
+                   value="{{ .Test.TXMode }}">
+        </div>
+        <div class="input-field">
+            <div class="label">MCS Mode:</div>
+            <input name="testMCS"
+                   id="testMCS"
+                   type="text"
+                   autocorrect="off"
+                   autocapitalize="none"
+                   value="{{ .Test.MCS }}">
+        </div>
+        <div class="input-field">
+            <div class="label">IPG</div>
+            <input name="testIPG"
+                   id="testIPG"
+                   type="text"
+                   autocorrect="off"
+                   autocapitalize="none"
+                   value="{{ .Test.IPG }}">
+        </div>
+        <div class="input-field">
+            <div class="label">Channel</div>
+            <input name="testChannel"
+                   id="testChannel"
+                   type="text"
+                   autocorrect="off"
+                   autocapitalize="none"
+                   value="{{ .Test.Channel }}">
+        </div>
+        <div class="input-field">
+            <div class="label">Tx Power:</div>
+            <input name="testTxPower"
+                   id="testTxPower"
+                   type="text"
+                   autocorrect="off"
+                   autocapitalize="none"
+                   value="{{ .Test.TxPower }}">
+        </div>
+        <div class="actions">
+            <button type="submit" class="primary-button" value="testSubmit"
+                name="submit">Run</button>
+        </div>
+    </form>
+
+    <div class="separator"/>
+    <form action="/config" class="animate" method="post">
+        <div class="header">
+            <p class="title">Thermal Protection Control</p>
+        </div>
+
+        <div class="input-field">
+            <div class="label">2.4Ghz TPC Duty</div>
+            <input name="TpcDuty2Ghz"
+                   id="TpcDuty2Ghz"
+                   type="text"
+                   autocorrect="off"
+                   autocapitalize="none"
+                   value="{{ .Thermal.TpcDuty2Ghz }}">
+        </div>
+        <div class="input-field">
+            <div class="label">5Ghz TPC Duty</div>
+            <input name="TpcDuty5Ghz"
+                   id="TpcDuty5Ghz"
+                   type="text"
+                   autocorrect="off"
+                   autocapitalize="none"
+                   value="{{ .Thermal.TpcDuty5Ghz }}">
+        </div>
+        <div class="input-field">
+            <div class="label">2.4Ghz TPC Settings</div>
+            <input name="TpcSetting2Ghz"
+                   id="TpcSetting2Ghz"
+                   type="text"
+                   autocorrect="off"
+                   autocapitalize="none"
+                   value="{{ .Thermal.TpcSetting2Ghz }}">
+        </div>
+        <div class="input-field">
+            <div class="label">5Ghz TPC Settings</div>
+            <input name="TpcSetting5Ghz"
+                   id="TpcSetting5Ghz"
+                   type="text"
+                   autocorrect="off"
+                   autocapitalize="none"
+                   value="{{ .Thermal.TpcSetting5Ghz }}">
+        </div>
+        <div class="actions">
+            <button type="submit" class="primary-button" value="thermalSubmit"
+                name="submit">Update</button>
+        </div>
+    </form>
+{{ end }}
+</body>
+</html>

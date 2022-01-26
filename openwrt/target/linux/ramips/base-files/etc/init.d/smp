@@ -1,0 +1,9 @@
+#!/bin/sh /etc/rc.common
+# Copyright (C) 2006 OpenWrt.org
+
+START=99
+start() {
+	echo "run smp.sh...."
+	/sbin/smp.sh
+}
+

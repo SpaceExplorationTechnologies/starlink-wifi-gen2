@@ -1,0 +1,20 @@
+[ ifup = "$ACTION" ] && {
+	[ -n "$DEVICE" ] && {
+		if [ "$INTERFACE" == "lan" ]; then
+			if [ -f /proc/mt7622/set_lan_ip ]; then
+			# enable 7622 LRO if /proc API exist
+				uci -q get network.lan.ipaddr > /proc/mt7622/set_lan_ip
+			elif [ -f /usr/sbin/ethtool ]; then
+				ifname=eth0
+				lan_ip=`uci -q get network.lan.ipaddr`
+				ethdrv=`ethtool -i $ifname | grep mtk_soc_eth`
+			# enable MTK HW LRO by ethtool
+				[ -n "$ethdrv" ] && {
+					ethtool -N $ifname flow-type tcp4 dst-ip $lan_ip loc 0
+				}
+			fi
+			# add other Platform LRO enabler below
+			#.... 
+		fi
+	}
+}

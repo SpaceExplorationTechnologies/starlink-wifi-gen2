@@ -1,0 +1,27 @@
+Index: linux-4.4.70/drivers/net/wireless/Makefile
+===================================================================
+--- linux-4.4.70.orig/drivers/net/wireless/Makefile	2017-08-30 12:29:44.908846000 +0800
++++ linux-4.4.70/drivers/net/wireless/Makefile	2017-08-30 12:37:18.238617000 +0800
+@@ -45,6 +45,9 @@
+ 
+ obj-$(CONFIG_WL_MEDIATEK)	+= mediatek/
+ 
++# Add wifi-utility And always build-in
++obj-y += wifi_utility/
++
+ obj-$(CONFIG_P54_COMMON)	+= p54/
+ 
+ obj-$(CONFIG_ATH_CARDS)		+= ath/
+Index: linux-4.4.70/drivers/net/wireless/wifi_utility/Makefile
+===================================================================
+--- linux-4.4.70.orig/drivers/net/wireless/wifi_utility/Makefile	2017-08-30 12:30:34.041938000 +0800
++++ linux-4.4.70/drivers/net/wireless/wifi_utility/Makefile	2017-08-30 12:38:41.282179000 +0800
+@@ -1,4 +1,6 @@
+ #always build-in
+-obj-y += mt_wifi_mtd.o
+-obj-y += pci_mediatek_rbus.o
++#obj-y += mt_wifi_mtd.o
++#obj-y += pci_mediatek_rbus.o
+ 
++obj-y += wifi_utility.o
++wifi_utility-objs := mt_wifi_mtd.o pci_mediatek_rbus.o

@@ -1,0 +1,12 @@
+diff -urN a/src/proxy.c b/src/proxy.c
+--- a/src/proxy.c	2018-01-05 11:00:52.902255593 +0800
++++ b/src/proxy.c	2018-01-05 11:01:00.902252215 +0800
+@@ -126,7 +126,7 @@
+ {
+ 	struct proxy *proxy = NULL, *p;
+ 	list_for_each_entry(p, &proxies, head)
+-		if (proxy->ifindex == uplink)
++		if (p->ifindex == uplink)
+ 			proxy = p;
+ 
+ 	if (proxy && (downlinks_cnt == 0 ||

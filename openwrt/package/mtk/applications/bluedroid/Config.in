@@ -1,0 +1,7 @@
+if PACKAGE_bluedroid
+config MTK_VENDOR_LIB_HCI_TYPE
+	bool "HCI Type Vendor Library"
+	default n
+	depends on PACKAGE_bluedroid
+
+endif #PACKAGE_bluedroid#

@@ -1,0 +1,13 @@
+To compile:
+
+gcc mt7620nand.c -o  mt7620nand
+
+
+example :
+
+./mt7620nand 64 uboot.img
+
+Note : 64 means spare area size, if the spare area size is 128, should change it 128
+
+
+

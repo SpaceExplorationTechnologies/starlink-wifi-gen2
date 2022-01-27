@@ -1,0 +1,1 @@
+obj-$(CONFIG_MT7622_SF)	+= sf.o

@@ -1,0 +1,43 @@
+diff --git a/net/ipv6/sit.c b/net/ipv6/sit.c
+index 5039486c4..1e23b5192 100644
+--- a/net/ipv6/sit.c
++++ b/net/ipv6/sit.c
+@@ -55,6 +55,7 @@
+ #include <net/dsfield.h>
+ #include <net/net_namespace.h>
+ #include <net/netns/generic.h>
++#include <net/netfilter/nf_hnat.h>
+ 
+ /*
+    This version of net/ipv6/sit.c is cloned of net/ipv4/ip_gre.c
+@@ -1337,6 +1338,22 @@ static int ipip6_tunnel_change_mtu(struct net_device *dev, int new_mtu)
+ 	return 0;
+ }
+ 
++static int ipip6_dev_hnat_check(struct hnat_hw_path *path)
++{
++
++	struct net_device *dev = path->real_dev;
++	struct ip_tunnel *tnl = netdev_priv(dev);
++
++	if (path->flags & HNAT_PATH_6RD)
++		return -EEXIST;
++
++	path->flags |= HNAT_PATH_6RD;
++	path->real_dev = tnl->dev;
++
++	return 0;
++
++}
++
+ static const struct net_device_ops ipip6_netdev_ops = {
+ 	.ndo_init	= ipip6_tunnel_init,
+ 	.ndo_uninit	= ipip6_tunnel_uninit,
+@@ -1345,6 +1362,7 @@ static const struct net_device_ops ipip6_netdev_ops = {
+ 	.ndo_change_mtu	= ipip6_tunnel_change_mtu,
+ 	.ndo_get_stats64 = ip_tunnel_get_stats64,
+ 	.ndo_get_iflink = ip_tunnel_get_iflink,
++	.ndo_hnat_check = ipip6_dev_hnat_check,
+ };
+ 
+ static void ipip6_dev_free(struct net_device *dev)

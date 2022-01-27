@@ -1,0 +1,24 @@
+diff -urN a/src/bench.h b/src/bench.h
+--- a/src/bench.h	2017-09-27 13:54:43.628197247 +0800
++++ b/src/bench.h	2017-09-27 13:55:04.085212493 +0800
+@@ -78,7 +78,7 @@
+ #endif /* HAVE_int64 */
+ 
+ #if (!defined(HAVE_socklen_t) && !defined(__socklen_t_defined))
+-typedef int socklen_t;
++//typedef int socklen_t;
+ #endif
+ 
+ #ifndef HAVE_off64_t
+diff -urN a/src/lat_http.c b/src/lat_http.c
+--- a/src/lat_http.c	2017-09-27 13:56:28.015394463 +0800
++++ b/src/lat_http.c	2017-09-27 13:56:34.112255764 +0800
+@@ -27,7 +27,7 @@
+ 	sock = tcp_connect(server, prog, SOCKOPT_REUSE);
+ 	sprintf(buf, "GET /%s HTTP/1.0\r\n\r\n\n", file);
+ 	if (debug) {
+-		printf(buf);
++		printf("%s",buf);
+ 	}
+ 	write(sock, buf, strlen(buf));
+ 	while ((n = read(sock, buf, XFERSIZE)) > 0) {

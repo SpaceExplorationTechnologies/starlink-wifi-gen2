@@ -1,0 +1,21 @@
+--- a/capchild/Makefile.in
++++ b/capchild/Makefile.in
+@@ -179,15 +179,15 @@ depcomp = $(SHELL) $(top_srcdir)/depcomp
+ am__depfiles_maybe = depfiles
+ am__mv = mv -f
+ COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
+-	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
++	$(filter-out -I/usr/include ,$(CPPFLAGS)) $(AM_CFLAGS) $(filter-out -I/usr/include ,$(CFLAGS))
+ AM_V_lt = $(am__v_lt_@AM_V@)
+ am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
+ am__v_lt_0 = --silent
+ am__v_lt_1 =
+ LTCOMPILE = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+ 	$(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) \
+-	$(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
+-	$(AM_CFLAGS) $(CFLAGS)
++	$(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(filter-out -I/usr/include ,$(CPPFLAGS)) \
++	$(AM_CFLAGS) $(filter-out -I/usr/include ,$(CFLAGS))
+ AM_V_CC = $(am__v_CC_@AM_V@)
+ am__v_CC_ = $(am__v_CC_@AM_DEFAULT_V@)
+ am__v_CC_0 = @echo "  CC      " $@;

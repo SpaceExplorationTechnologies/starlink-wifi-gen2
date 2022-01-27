@@ -1,0 +1,13 @@
+diff -urN a/system-linux.c b/system-linux.c
+--- a/system-linux.c	2018-08-31 11:02:20.993392274 +0800
++++ b/system-linux.c	2018-08-31 11:02:25.993380794 +0800
+@@ -1328,6 +1328,9 @@
+ 	long n_cpus = sysconf(_SC_NPROCESSORS_ONLN);
+ 	int val;
+ 
++	//we control rps by smp.sh ,bypass rps handle here
++	return;
++
+ 	if (n_cpus < 2)
+ 		return;
+ 

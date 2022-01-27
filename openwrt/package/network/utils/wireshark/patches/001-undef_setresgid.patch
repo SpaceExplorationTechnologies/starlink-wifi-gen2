@@ -1,0 +1,11 @@
+--- a/wsutil/privileges.h
++++ b/wsutil/privileges.h
+@@ -23,6 +23,8 @@
+ #ifndef __PRIVILEGES_H__
+ #define __PRIVILEGES_H__
+
++#undef HAVE_SETRESGID
++
+ #include "ws_symbol_export.h"
+
+ #ifdef __cplusplus

@@ -1,0 +1,21 @@
+#!/bin/sh /etc/rc.common
+
+START=99
+STOP=99
+USE_PROCD=1
+
+start_service() {
+	if [ -e /usr/bin/tee-supplicant -a -e /dev/teepriv0 ]; then
+		echo "Starting tee-supplicant..."
+		tee-supplicant -d
+		exit 0
+	fi
+}
+
+stop_service() {
+	if [ -e /usr/bin/tee-supplicant -a -e /dev/teepriv0 ]; then
+		echo "Stoping tee-supplicant..."
+		killall tee-supplicant
+		exit 0
+	fi
+}

@@ -1,0 +1,53 @@
+# List of directories which should not be copied to the public repo since they contain proprietary code.
+
+# Keys used as standins for development builds, not valid on prod-fused routers anyways.
+keys
+
+# MTK prop application software (also don't copy over source tarballs)
+openwrt/package/mtk/applications/1905daemon
+openwrt/dl/1905daemon-2a7dc548.tar.bz2
+openwrt/package/mtk/applications/8021xd
+openwrt/dl/8021xd-cfdd0cb2.tar.bz2
+openwrt/package/mtk/applications/air_monitor
+openwrt/dl/air_monitor-be424fa9.tar.bz2
+openwrt/package/mtk/applications/ated_ext
+openwrt/dl/ated_ext-a9e4393e.tar.bz2
+openwrt/package/mtk/applications/flash_test
+openwrt/package/mtk/applications/fwdd
+openwrt/dl/fwdd-3fa5135f.tar.bz2
+openwrt/package/mtk/applications/hwnat
+openwrt/dl/hwnat-af071fb6.tar.gz
+openwrt/package/mtk/applications/l2ogre
+openwrt/package/mtk/applications/long_loop
+openwrt/package/mtk/applications/malloctest
+openwrt/package/mtk/applications/mapd
+openwrt/dl/mapd-7255d8b3.tar.bz2
+openwrt/package/mtk/applications/mii_mgr
+openwrt/dl/mii_mgr-ef06bdb2.tar.gz
+openwrt/package/mtk/applications/mtknvram
+openwrt/dl/nvram-66a28550.tar.gz
+openwrt/package/mtk/applications/mtk-efuse-tool
+openwrt/package/mtk/applications/qdma
+openwrt/dl/qdma-5aab86d1.tar.gz
+openwrt/package/mtk/applications/regs
+openwrt/dl/regs-ea2d8b8b.tar.gz
+openwrt/package/mtk/applications/sigma_daemon
+openwrt/package/mtk/applications/sigma_dut_v9.0.0
+openwrt/dl/sigma_dut-8b657e39.tar.bz2
+openwrt/package/mtk/applications/smart_speed
+openwrt/package/mtk/applications/switch
+openwrt/dl/switch-d6f1bd56.tar.gz
+openwrt/package/mtk/applications/wappd
+openwrt/dl/wappd-23db7abb.tar.bz2
+openwrt/package/mtk/applications/wificonf
+
+# MTK misc prop software
+openwrt/package/mtk/misc/autotest
+openwrt/package/mtk/misc/mtk_factory_rw
+openwrt/package/mtk/misc/mtk_failsafe
+openwrt/package/mtk/misc/mtkhnat_util
+openwrt/package/mtk/misc/pktgen
+
+# MTK test prop software
+openwrt/package/mtk/test/firmware_test
+openwrt/package/mtk/test/uevd

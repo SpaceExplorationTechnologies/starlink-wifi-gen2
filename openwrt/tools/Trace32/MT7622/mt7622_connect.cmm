@@ -1,0 +1,91 @@
+;*****************************************************************************
+;  Copyright Statement:
+;  --------------------
+;  This software is protected by Copyright and the information contained
+;  herein is confidential. The software may not be copied and the information
+;  contained herein may not be used or disclosed except with the written
+;  permission of MediaTek Inc. (C) 2011
+;
+;*****************************************************************************
+;;================================================
+;; PURPOSE:     ASIC connect
+;; CREATE_DATE: 2016/12/09
+;; NOTE:
+;;================================================
+; Specify Core Number
+;=================================================
+
+&NR_CPUS=2
+; cluster 0 corebase: 0x8007000, 0x8007200, 0x8007400, 0x8007600
+; cluster 1 corebase: 0x8009000, 0x8009200, 0x8009400, 0x8009600
+
+;=================================================
+; Initialize CPU
+;=================================================
+&WDT_TEST=1
+if &WDT_TEST==0
+(
+	RESET
+	SYSTEM.OPTION ENRESET ON
+)
+
+SYSTEM.RESET
+SYSTEM.OPTION ENRESET OFF
+SYSTEM.OPTION RESBREAK OFF
+SYSTEM.OPTION WAITRESET OFF
+
+SYSTEM.JTAGCLOCK 10.MHz;
+
+;SYSTEM.CPU CortexA7MPCore
+SYStem.CPU CORTEXA53;
+
+;R-T Memory Access
+SYSTEM.MULTICORE MEMORYACCESSPORT 0
+SYSTEM.MULTICORE DEBUGACCESSPORT 1
+
+;SYSTEM.MULTICORE COREBASE APB:0x80070000
+;Setting Core debug register access
+if &NR_CPUS==1
+(
+    SYStem.CONFIG CORENUMBER 1;
+    SYStem.CONFIG COREBASE 0x80810000;
+    SYStem.CONFIG CTIBASE 0x80820000;
+)
+else
+(
+    SYSTEM.CONFIG CORENUMBER 2;
+    SYSTEM.CONFIG COREBASE 0x80810000 0x80910000;
+    SYStem.CONFIG CTIBASE 0x80820000 0x80920000;
+)
+
+;=================================================
+; Attach and Stop CPU
+;=================================================
+SYStem.Up
+wait 200.us
+
+
+SETUP.IMASKHLL ON
+SETUP.IMASKASM ON
+
+
+; set_hw_breakpoint_by_def
+; setting attribute of breakpoints
+Break.Select Program OnChip
+Break.Select Hll OnChip
+Break.Select Spot OnChip
+Break.Select Read OnChip
+Break.Select Write OnChip
+
+D.S C15:0x1 0				; Turn off MMU
+
+; disable wdt (debug purpose)
+D.S SD:0x10212000 %LE %LONG 0x22000000
+
+Register.Set T 0 ; must
+
+Break.Delete /ALL
+
+
+
+enddo

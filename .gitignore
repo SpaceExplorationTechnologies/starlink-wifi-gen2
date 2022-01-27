@@ -1,0 +1,9 @@
+*.img
+*.bin
+*-offsets.s
+._*
+.config*
+/bin/
+!/factory_calibration/factory_calibration.bin
+openwrt/package/base-files/files/etc/required-rollback-version
+.vscode/

@@ -1,0 +1,51 @@
+flash.info
+  FLASH_NAME : The FLASH_NAME is composed by "total size in bits" _ "page size in K" _ "spare area size"
+  For example the default NAND flash type is 
+		total size = 1Gb(128MB), 
+		page size=2K(2048), 
+		spare area size=64,
+  then the FLASH_NAME in flash.info is 1Gb_2K_64
+
+  Please check below table for "compatible flash name" mapping to "FLASH_NAME"
+  Page Size  |  Spare Size  |  Total size	 | 	FLASH_NAME	| 	compatible flash name
+  2K(2048)	64		1Gb(128MB)		1Gb_2K_64		MX30LF1G18AC, MX30UF1G18AC, W29N01HZSINF, F59D1G81MA, S34MS01G200TFI000
+  2K(2048)	64		2Gb(256MB)		2Gb_2K_64		MX30LF2G18AC, MX30UF2G18AC, W29N02GZSIBA, F59D2G81A
+  2K(2048)	64		4Gb(512MB)		4Gb_2K_64		MX30LF4G18AC, MX30UF4G18AC, W29N04GZSIBA, F59D4G81A
+  2K(2048)	128		2Gb(128MB)		2Gb_2K_128		TC58NYG0S3HTA00, S34MS02G200TFI000
+  2K(2048)	128		4Gb(256MB)		4Gb_2K_128		TC58NYG1S3HTA00, S34MS04G200TFI000
+
+mk_single_img.sh
+
+  This script can combine several image into a single image. 
+  Then convert this image into a new format which insert spare area/ECC for each page
+  the input file of preloader should be preloader_evb7622_64.bin, which did not include header,
+  the output file name for single image without ECC is mt7622_img
+  the outpur file name for single image with ECC is mt7622_img.ecc
+  Note: please use mt7622_img.ecc for flash programmer
+
+  The single image is based on MTK's reference partition layout, which is
+  	preloader	0x0~0x80000
+	atf		0x80000~0xc0000
+	Uboot		0xc0000~0x140000
+	Config		0x140000~0x1c0000
+	Factory		0x1c0000~0x200000
+	Kernel		0x200000~
+  If your the partition layout is different, please modify mk_single_img.sh.
+
+gen_ecc.sh
+
+  This script can generate ECC for image, the output image can be used by a flash programmer.
+
+
+mk_preloader.sh
+
+  This image will add device-header for preloader_evb7622_64.bin.
+  Please modify variables in the script before use it.
+  Please use preloader_evb7622_64.bin for preloader input file.
+
+
+
+sbch:
+version:v1.0.0004
+md5sum: d2967463786b3f849e36f1c0a6f6107c
+

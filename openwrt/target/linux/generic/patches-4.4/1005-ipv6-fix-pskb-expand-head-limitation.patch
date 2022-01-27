@@ -1,0 +1,14 @@
+diff --git a/net/core/skbuff.c b/net/core/skbuff.c
+index bbd5e3b1..0d488491 100644
+--- a/net/core/skbuff.c
++++ b/net/core/skbuff.c
+@@ -1154,6 +1154,9 @@ int pskb_expand_head(struct sk_buff *skb, int nhead, int ntail,
+ 	       skb_shinfo(skb),
+ 	       offsetof(struct skb_shared_info, frags[skb_shinfo(skb)->nr_frags]));
+ 
++	/*headroom copy*/
++	memcpy(data, skb->head, FOE_INFO_LEN);
++
+ 	/*hwnat copy headroom*/
+ 	hwnat_copy_headroom(data, skb);
+ 	/*hwnat copy tailroom*/

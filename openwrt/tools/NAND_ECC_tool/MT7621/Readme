@@ -1,0 +1,18 @@
+MT7621 ECC convert tool using guide
+
+copy image to RT288x_SDK/tools/NAND_ECC_tool/MT7621
+cd RT288x_SDK/tools/NAND_ECC_tool/MT7621
+
+
+USAGE: ./BCH ENC|DEC PAGE_SIZE SPARE_SIZE input_file output_file
+SPARE_SIZE 64/128/224
+PAGE_SIZE 2048/4096
+
+example: ./BCH e 2048 64 roger_image linux_4bitECC.bin
+
+md5sum BCH
+V1:
+426e0d0457eda53ff8311fff046b6d64  BCH
+V2:
+c228cfcf63a39f261a7d38526bd18228  BCH
+

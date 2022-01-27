@@ -1,0 +1,144 @@
+;*****************************************************************************
+;  Copyright Statement:
+;  --------------------
+;  This software is protected by Copyright and the information contained
+;  herein is confidential. The software may not be copied and the information
+;  contained herein may not be used or disclosed except with the written
+;  permission of MediaTek Inc. (C) 2017
+;
+;*****************************************************************************
+;;================================================
+;; PURPOSE:     FPGA Bring Up
+;; CREATE_DATE: 2017/08/31
+;; NOTE:
+
+;;================================================
+; Specify Core Number
+;=================================================
+&NR_CPUS=2
+
+;=================================================
+; Initialize CPU
+;=================================================
+;SYStem.reset
+SYStem.OPTION TRST ON
+SYStem.OPTION ENRESET ON
+SYStem.Option ResBreak OFF
+SYStem.Option WaitReset OFF
+SYStem.JtagClock 10.MHz
+
+if &NR_CPUS==1
+(
+    SYSTEM.CPU CortexA7MPCore
+)
+else
+(
+    SYSTEM.CPU CortexA7MPCore
+)
+
+if &NR_CPUS==1
+(
+  ;Setting Core debug register access
+    SYSTEM.CONFIG CORENUMBER 1;
+    SYSTEM.MULTICORE COREBASE 0x80810000;
+    ;SYSTEM.CONFIG CTIBASE 0x80818000;
+    ;SYSTEM.CONFIG PMUBASE 0x80811000;
+)
+else
+(
+  ;SYSTEM.MULTICORE COREBASE 0x80070000 0x80072000;
+    SYSTEM.CONFIG CORENUMBER 2;
+    SYSTEM.CONFIG COREBASE 0x80810000 0x80812000;
+    ;SYSTEM.CONFIG CTIBASE  0x80818000 0x80819000;
+    ;SYSTEM.CONFIG PMUBASE  0x80811000 0x80813000;
+)
+
+;=================================================
+; Attach and Stop CPU
+;=================================================
+SYStem.Up
+wait 200.us
+
+;share L2 sram 128KB
+;D.S SD:0x10200618 %LE %LONG 0x00000000 ;
+D.S SD:0x102007f0 %LE %LONG 0x00000000 ;
+D.S SD:0x102007f0 %LE %LONG 0x00000001 ;Enable 128KB L2C share SRAM
+
+; disable DABORT and PABORT breakpoint
+tronchip.set dabort off
+tronchip.set pabort off
+tronchip.set undef off
+tronchip.set irq off
+
+Break.Delete /ALL
+
+D.S C15:0x1 0				; Turn off MMU
+
+;stop
+; disable wdt (debug purpose)
+D.S SD:0x10212000 %LE %LONG 0x22000000
+
+;Disable acinactm
+;d.s c:0x1020002c  %le %long 0x8
+;d.s c:0x1020022c  %le %long 0x8
+
+;=================================================
+; Initialize EMI
+;=================================================
+&init_emi=1 ; 0: not init
+            ; 1: init
+IF &init_emi==1
+(
+  ;Init DDR
+    do MT7626_FPGA_DDR.cmm
+    wait 6000.ms
+)
+;
+;Add dram test
+;
+Data.Set 0x40000000 %Long 0xFFFFFFFF
+&ret=Data.Long(D:0x40000000)
+PRINT &ret
+IF &ret!=0xFFFFFFFF
+(
+    PRINT %ERROR "DRAM: 0x40000000!=0xFFFFFFFF !"
+    DIALOG.OK "ERROR: DRAM: 0x40000000!=0xFFFFFFFF !"
+    STOP
+)
+Data.Set 0x40000000--0x400002FF %Long 0xFFFFFFFF
+Data.Set 0x50000000--0x500002FF %Long 0xFFFFFFFF
+Data.ComPare 0x40000000--0x400002FF 0x50000000
+IF FOUND()
+(
+    PRINT %ERROR "Dram compare error, found at address 0x" ADDRESS.OFFSET(TRACK.ADDRESS())
+    DIALOG.OK "ERROR: Dram R/W test error !! "
+    STOP
+)
+Data.Set 0x40000000 %Long 0x0
+Data.Set 0x40000000--0x400002FF %Long 0x0
+Data.Set 0x50000000--0x500002FF %Long 0x0
+
+print "DRAM R/W test done."
+
+;=================================================
+; Load DTB & Image to dram.
+;=================================================
+
+D.LOAD.BINARY .\u-boot-spl-fpga.bin 0x00201000 /noclear
+D.LOAD.BINARY .\u-boot.img 0x41DFFFC0 /noclear
+
+IF &NR_CPUS==2
+(
+	core.select 1
+	r.s pc 0x00201000       ;SPL entry
+	core.select 0
+	r.s pc 0x00201000       ;SPL entry
+)
+ELSE IF &NR_CPUS==1
+(
+	core.select 0
+	r.s pc 0x00201000       ;SPL entry
+)
+
+;d.l
+go

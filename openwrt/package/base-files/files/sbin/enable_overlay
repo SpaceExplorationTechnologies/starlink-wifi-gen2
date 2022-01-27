@@ -1,0 +1,12 @@
+#!/bin/sh
+#
+# Enable persistent overlay for development.
+
+echo "WARNING: Enabling persistent overlay. This should only be used during development."
+
+for path in bin etc lib root sbin usr www; do
+	for dir in upper work; do
+		mkdir -p /config/overlay/$dir/$path
+	done
+	mount -t overlay overlay -o lowerdir=/$path,upperdir=/config/overlay/upper/$path,workdir=/config/overlay/work/$path,noatime,rw /$path
+done

@@ -1,0 +1,47 @@
+--- a/Makefile.in
++++ b/Makefile.in
+@@ -2124,7 +2124,7 @@ dumpcap-capture_stop_conditions.obj: cap
+ @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dumpcap_CPPFLAGS) $(CPPFLAGS) $(dumpcap_CFLAGS) $(CFLAGS) -c -o dumpcap-capture_stop_conditions.obj `if test -f 'capture_stop_conditions.c'; then $(CYGPATH_W) 'capture_stop_conditions.c'; else $(CYGPATH_W) '$(srcdir)/capture_stop_conditions.c'; fi`
+
+ dumpcap-conditions.o: conditions.c
+-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dumpcap_CPPFLAGS) $(CPPFLAGS) $(dumpcap_CFLAGS) $(CFLAGS) -MT dumpcap-conditions.o -MD -MP -MF $(DEPDIR)/dumpcap-conditions.Tpo -c -o dumpcap-conditions.o `test -f 'conditions.c' || echo '$(srcdir)/'`conditions.c
++@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dumpcap_CPPFLAGS) $(filter-out -I/usr/include ,$(CPPFLAGS)) $(dumpcap_CFLAGS) $(filter-out -I/usr/include ,$(CFLAGS)) -MT dumpcap-conditions.o -MD -MP -MF $(DEPDIR)/dumpcap-conditions.Tpo -c -o dumpcap-conditions.o `test -f 'conditions.c' || echo '$(srcdir)/'`conditions.c
+ @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/dumpcap-conditions.Tpo $(DEPDIR)/dumpcap-conditions.Po
+ @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='conditions.c' object='dumpcap-conditions.o' libtool=no @AMDEPBACKSLASH@
+ @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@@ -2138,7 +2138,7 @@ dumpcap-conditions.obj: conditions.c
+ @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dumpcap_CPPFLAGS) $(CPPFLAGS) $(dumpcap_CFLAGS) $(CFLAGS) -c -o dumpcap-conditions.obj `if test -f 'conditions.c'; then $(CYGPATH_W) 'conditions.c'; else $(CYGPATH_W) '$(srcdir)/conditions.c'; fi`
+
+ dumpcap-dumpcap.o: dumpcap.c
+-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dumpcap_CPPFLAGS) $(CPPFLAGS) $(dumpcap_CFLAGS) $(CFLAGS) -MT dumpcap-dumpcap.o -MD -MP -MF $(DEPDIR)/dumpcap-dumpcap.Tpo -c -o dumpcap-dumpcap.o `test -f 'dumpcap.c' || echo '$(srcdir)/'`dumpcap.c
++@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dumpcap_CPPFLAGS) $(filter-out -I/usr/include ,$(CPPFLAGS)) $(dumpcap_CFLAGS) $(filter-out -I/usr/include ,$(CFLAGS)) -MT dumpcap-dumpcap.o -MD -MP -MF $(DEPDIR)/dumpcap-dumpcap.Tpo -c -o dumpcap-dumpcap.o `test -f 'dumpcap.c' || echo '$(srcdir)/'`dumpcap.c
+ @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/dumpcap-dumpcap.Tpo $(DEPDIR)/dumpcap-dumpcap.Po
+ @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='dumpcap.c' object='dumpcap-dumpcap.o' libtool=no @AMDEPBACKSLASH@
+ @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@@ -2320,7 +2320,7 @@ rawshark-sync_pipe_write.obj: sync_pipe_
+ @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(rawshark_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o rawshark-sync_pipe_write.obj `if test -f 'sync_pipe_write.c'; then $(CYGPATH_W) 'sync_pipe_write.c'; else $(CYGPATH_W) '$(srcdir)/sync_pipe_write.c'; fi`
+
+ rawshark-extcap.o: extcap.c
+-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(rawshark_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT rawshark-extcap.o -MD -MP -MF $(DEPDIR)/rawshark-extcap.Tpo -c -o rawshark-extcap.o `test -f 'extcap.c' || echo '$(srcdir)/'`extcap.c
++@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(rawshark_CPPFLAGS) $(filter-out -I/usr/include ,$(CPPFLAGS)) $(AM_CFLAGS) $(filter-out -I/usr/include ,$(CFLAGS)) -MT rawshark-extcap.o -MD -MP -MF $(DEPDIR)/rawshark-extcap.Tpo -c -o rawshark-extcap.o `test -f 'extcap.c' || echo '$(srcdir)/'`extcap.c
+ @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/rawshark-extcap.Tpo $(DEPDIR)/rawshark-extcap.Po
+ @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='extcap.c' object='rawshark-extcap.o' libtool=no @AMDEPBACKSLASH@
+ @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@@ -2460,7 +2460,7 @@ sharkd-sync_pipe_write.obj: sync_pipe_wr
+ @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(sharkd_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sharkd-sync_pipe_write.obj `if test -f 'sync_pipe_write.c'; then $(CYGPATH_W) 'sync_pipe_write.c'; else $(CYGPATH_W) '$(srcdir)/sync_pipe_write.c'; fi`
+
+ sharkd-extcap.o: extcap.c
+-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(sharkd_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sharkd-extcap.o -MD -MP -MF $(DEPDIR)/sharkd-extcap.Tpo -c -o sharkd-extcap.o `test -f 'extcap.c' || echo '$(srcdir)/'`extcap.c
++@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(sharkd_CPPFLAGS) $(filter-out -I/usr/include ,$(CPPFLAGS)) $(AM_CFLAGS) $(filter-out -I/usr/include ,$(CFLAGS)) -MT sharkd-extcap.o -MD -MP -MF $(DEPDIR)/sharkd-extcap.Tpo -c -o sharkd-extcap.o `test -f 'extcap.c' || echo '$(srcdir)/'`extcap.c
+ @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/sharkd-extcap.Tpo $(DEPDIR)/sharkd-extcap.Po
+ @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='extcap.c' object='sharkd-extcap.o' libtool=no @AMDEPBACKSLASH@
+ @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@@ -2754,7 +2754,7 @@ tshark-sync_pipe_write.obj: sync_pipe_wr
+ @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(tshark_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tshark-sync_pipe_write.obj `if test -f 'sync_pipe_write.c'; then $(CYGPATH_W) 'sync_pipe_write.c'; else $(CYGPATH_W) '$(srcdir)/sync_pipe_write.c'; fi`
+
+ tshark-extcap.o: extcap.c
+-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(tshark_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT tshark-extcap.o -MD -MP -MF $(DEPDIR)/tshark-extcap.Tpo -c -o tshark-extcap.o `test -f 'extcap.c' || echo '$(srcdir)/'`extcap.c
++@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(tshark_CPPFLAGS) $(filter-out -I/usr/include ,$(CPPFLAGS)) $(AM_CFLAGS) $(filter-out -I/usr/include ,$(CFLAGS)) -MT tshark-extcap.o -MD -MP -MF $(DEPDIR)/tshark-extcap.Tpo -c -o tshark-extcap.o `test -f 'extcap.c' || echo '$(srcdir)/'`extcap.c
+ @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/tshark-extcap.Tpo $(DEPDIR)/tshark-extcap.Po
+ @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='extcap.c' object='tshark-extcap.o' libtool=no @AMDEPBACKSLASH@
+ @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@

@@ -1,0 +1,29 @@
+diff -urN a/lib/libipsecconf/parser.l b/lib/libipsecconf/parser.l
+--- a/lib/libipsecconf/parser.l	2018-09-04 16:00:39.203557809 +0800
++++ b/lib/libipsecconf/parser.l	2018-09-04 16:02:06.750022282 +0800
+@@ -34,6 +34,13 @@
+ #include "ipsecconf/parserlast.h"
+ #include "ipsecconf/starterlog.h"
+ 
++#ifndef GLOB_BRACE     
++#define GLOB_BRACE 0
++#endif
++#ifndef GLOB_NOMAGIC     
++#define GLOB_NOMAGIC 0
++#endif
++
+ #define MAX_INCLUDE_DEPTH  10
+ 
+ char rootdir[PATH_MAX];      /* when evaluating paths, prefix this to them */
+diff -urN a/programs/pluto/sysdep_linux.c b/programs/pluto/sysdep_linux.c
+--- a/programs/pluto/sysdep_linux.c	2018-09-04 16:00:48.123406893 +0800
++++ b/programs/pluto/sysdep_linux.c	2018-09-04 16:02:25.461679353 +0800
+@@ -130,7 +130,7 @@
+          * Any used by library routines (perhaps the resolver or syslog)
+          * will remain.
+          */
+-	__sighandler_t savesig;
++	int savesig;
+         FILE *f;
+ 
+ 	savesig = signal(SIGCHLD, SIG_DFL);

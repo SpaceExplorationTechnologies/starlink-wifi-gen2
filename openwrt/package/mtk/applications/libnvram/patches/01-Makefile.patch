@@ -1,0 +1,13 @@
+Index: libnvram-0.9.28/Makefile
+===================================================================
+--- libnvram-0.9.28.orig/Makefile	2017-08-08 11:24:00.678571000 +0800
++++ libnvram-0.9.28/Makefile	2017-08-08 11:25:37.729818000 +0800
+@@ -42,7 +42,7 @@
+ else
+ OBJS	:= crc32.o nvram_env.o flash_api.o
+ endif
+-HEADERS := nvram_env.h nvram.h flash_api.h $(ROOTDIR)/kernel_headers/include/linux/autoconf.h
++HEADERS := nvram_env.h nvram.h flash_api.h 
+ 
+ all:	$(LIBNVRAM)
+ 

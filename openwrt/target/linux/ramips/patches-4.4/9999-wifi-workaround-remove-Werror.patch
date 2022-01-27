@@ -1,0 +1,13 @@
+diff --git a/drivers/Makefile b/drivers/Makefile
+index 606938d7..5555e86f 100644
+--- a/drivers/Makefile
++++ b/drivers/Makefile
+@@ -4,7 +4,7 @@
+ # 15 Sep 2000, Christoph Hellwig <hch@infradead.org>
+ # Rewritten to use lists instead of if-statements.
+ #
+-subdir-ccflags-y += -Werror
++#subdir-ccflags-y += -Werror
+ 
+ obj-y				+= irqchip/
+ obj-y				+= bus/

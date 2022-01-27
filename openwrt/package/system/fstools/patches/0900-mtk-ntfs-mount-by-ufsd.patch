@@ -1,0 +1,12 @@
+--- a/block.c	2017-11-07 11:13:11.502259230 +0800
++++ b/block.c	2017-11-07 11:16:43.484684786 +0800
+@@ -859,6 +859,9 @@
+ 		snprintf(_data, sizeof(_data), "%s", "iocharset=utf8,uid=65534,gid=65534");
+ 	}
+ 
++	if (strstr(fstype, "ntfs"))
++		fstype= "ufsd";
++
+ 	err = mount(source, target, fstype, m ? m->flags : 0,
+ 	            (m && m->options) ? m->options : _data);
+ 

@@ -1,0 +1,170 @@
+/dts-v1/;
+
+#include "rt2880.dtsi"
+
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/input/input.h>
+
+/ {
+	#address-cells = <1>;
+	#size-cells = <1>;
+	compatible = "F5D8235_V1", "ralink,rt2880-soc";
+	model = "Belkin F5D8235 v1";
+
+	pci@440000 {
+		status = "ok";
+	};
+
+	cfi@1f000000 {
+		compatible = "cfi-flash";
+		reg = <0xbc400000 0x800000>;
+		bank-width = <2>;
+		device-width = <2>;
+		#address-cells = <1>;
+		#size-cells = <1>;
+
+		partition@0 {
+			label = "uboot";
+			reg = <0x0 0x30000>;
+			read-only;
+		};
+
+		partition@30000 {
+			label = "uboot-env";
+			reg = <0x30000 0x10000>;
+			read-only;
+		};
+
+		factory: partition@40000 {
+			label = "factory";
+			reg = <0x40000 0x10000>;
+			read-only;
+		};
+
+		partition@50000 {
+			label = "firmware";
+			reg = <0x50000 0x7b0000>;
+		};
+	};
+
+	rtl8366s {
+		compatible = "realtek,rtl8366s";
+		gpio-sda = <&gpio0 1 GPIO_ACTIVE_HIGH>;
+		gpio-sck = <&gpio0 2 GPIO_ACTIVE_HIGH>;
+	};
+
+	gpio-keys-polled {
+		compatible = "gpio-keys-polled";
+		#address-cells = <1>;
+		#size-cells = <0>;
+		poll-interval = <100>;
+
+		wps {
+			label = "wps";
+			gpios = <&gpio0 0 GPIO_ACTIVE_LOW>;
+			linux,code = <KEY_WPS_BUTTON>;
+		};
+
+		reset {
+			label = "reset";
+			gpios = <&gpio0 9 GPIO_ACTIVE_LOW>;
+			linux,code = <KEY_RESTART>;
+		};
+	};
+
+	gpio-leds {
+		compatible = "gpio-leds";
+
+		internet {
+			label = "f5d8235-v1:blue:internet";
+			gpios = <&gpio0 17 GPIO_ACTIVE_LOW>;
+		};
+
+		internet2 {
+			label = "f5d8235-v1:amber:internet";
+			gpios = <&gpio0 18 GPIO_ACTIVE_LOW>;
+		};
+
+		modem {
+			label = "f5d8235-v1:blue:modem";
+			gpios = <&gpio0 13 GPIO_ACTIVE_LOW>;
+		};
+
+		modem2 {
+			label = "f5d8235-v1:amber:modem";
+			gpios = <&gpio0 21 GPIO_ACTIVE_LOW>;
+		};
+
+		router {
+			label = "f5d8235-v1:blue:router";
+			gpios = <&gpio0 14 GPIO_ACTIVE_HIGH>;
+		};
+
+		storage {
+			label = "f5d8235-v1:blue:storage";
+			gpios = <&gpio0 7 GPIO_ACTIVE_LOW>;
+		};
+
+		storage2 {
+			label = "f5d8235-v1:amber:storage";
+			gpios = <&gpio0 8 GPIO_ACTIVE_LOW>;
+		};
+
+		security {
+			label = "f5d8235-v1:blue:security";
+			gpios = <&gpio0 10 GPIO_ACTIVE_LOW>;
+		};
+
+		security2 {
+			label = "f5d8235-v1:amber:security";
+			gpios = <&gpio0 12 GPIO_ACTIVE_LOW>;
+		};
+
+		wired {
+			label = "f5d8235-v1:blue:wired";
+			gpios = <&gpio0 5 GPIO_ACTIVE_LOW>;
+		};
+
+		wired2 {
+			label = "f5d8235-v1:amber:wired";
+			gpios = <&gpio0 20 GPIO_ACTIVE_LOW>;
+		};
+
+		wireless {
+			label = "f5d8235-v1:blue:wireless";
+			gpios = <&gpio0 6 GPIO_ACTIVE_LOW>;
+		};
+
+		wireless2 {
+			label = "f5d8235-v1:amber:wireless";
+			gpios = <&gpio0 19 GPIO_ACTIVE_LOW>;
+		};
+	};
+};
+
+&gpio0 {
+	status = "okay";
+};
+
+&pinctrl {
+	state_default: pinctrl0 {
+		gpio {
+			mtk,group = "spi", "i2c", "jtag", "mdio", "uartlite";
+			mtk,function = "gpio";
+		};
+	};
+};
+
+&ethernet {
+	status = "okay";
+	mtd-mac-address = <&factory 0x4>;
+
+	port@0 {
+		mediatek,fixed-link = <1000 1 1 1>;
+	};
+};
+
+&wmac {
+	status = "okay";
+	ralink,mtd-eeprom = <&factory 0x0>;
+};

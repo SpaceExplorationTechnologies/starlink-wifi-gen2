@@ -1,0 +1,40 @@
+#!/bin/sh /etc/rc.common
+#
+# Start/stop the wifi control.
+#
+### BEGIN INIT INFO
+# Provides:          wifi_control
+# Short-Description: wifi control
+# Description:       Main WiFi router control process.
+### END INIT INFO
+
+START=50
+EXTRA_COMMANDS="debug"
+
+NAME="wifi_control"
+DEFAULT_BIN="/usr/sbin/wifi_control"
+BIN="${BIN:-$DEFAULT_BIN}"
+
+debug() {
+    echo "Debugging $NAME"
+    kill $(pgrep -x $DEFAULT_BIN) $(pgrep -x $BIN)
+    $BIN $ARGS
+}
+
+start() {
+    echo "Starting $NAME"
+    if [ ! -f "/tmp/enable_bypass_mode" ]; then
+        pgrep -x $BIN >/dev/null || $BIN $ARGS 2>&1 | logger -s -t $NAME -p info &
+    fi
+}
+
+stop() {
+    echo "Stopping $NAME"
+    kill $(pgrep -x $BIN)
+}
+
+restart() {
+    echo "Restarting $NAME"
+    stop
+    start
+}

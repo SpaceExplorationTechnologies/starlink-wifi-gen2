@@ -1,0 +1,8 @@
+mk_single_img.sh
+
+  The single image is based on MTK's reference NAND partition layout, which is
+	Bootloader	0x000000~0x100000
+	NVRAM		0x100000~0x140000
+	Factory		0x140000~0x1C0000
+	Kernel		0x1C0000~
+  If your the partition layout is different, please modify mk_single_img.sh.

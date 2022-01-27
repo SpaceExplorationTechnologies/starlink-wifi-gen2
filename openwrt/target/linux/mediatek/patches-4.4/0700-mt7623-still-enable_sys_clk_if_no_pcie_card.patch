@@ -1,0 +1,13 @@
+diff --git a/drivers/pci/host/pcie-mediatek.c b/drivers/pci/host/pcie-mediatek.c
+index bf68861..7caa82c 100644
+--- a/drivers/pci/host/pcie-mediatek.c
++++ b/drivers/pci/host/pcie-mediatek.c
+@@ -678,7 +678,7 @@ err_axi_clk:
+ err_aux_clk:
+ 	clk_disable_unprepare(port->ahb_ck);
+ err_ahb_clk:
+-	clk_disable_unprepare(port->sys_ck);
++//	clk_disable_unprepare(port->sys_ck);
+ err_sys_clk:
+ 	mtk_pcie_port_free(port);
+ }

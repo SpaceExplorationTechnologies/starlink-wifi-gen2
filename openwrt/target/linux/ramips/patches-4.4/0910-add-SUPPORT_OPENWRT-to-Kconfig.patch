@@ -1,0 +1,11 @@
+--- a/Kconfig
++++ b/Kconfig
+@@ -8,4 +8,8 @@ config SRCARCH
+ 	string
+ 	option env="SRCARCH"
+ 
++config SUPPORT_OPENWRT
++	bool "Support OpenWrt"
++	default n
++
+ source "arch/$SRCARCH/Kconfig"

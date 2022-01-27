@@ -1,0 +1,147 @@
+################################################################
+# Chipset specific definitions - MT Series
+#	Example:
+# HAS_MT_RF=y
+# HAS_MT_BBP=y
+# HAS_MT_MAC=y
+# HAS_MT_DMAC=n
+# HAS_MT_FMAC=n
+# HAS_INF_PCI=y
+# HAS_MAC_PCI=y
+# HAS_INF_USB=n
+# HAS_MAC_USB=n
+# HAS_INF_RBUS=n
+# HAS_CUT_THROUGH=y
+# HAS_RX_CUT_THROUGH=n
+# HAS_CUT_THROUGH_DBG=n
+# HAS_NEED_ROM_PATCH=y
+# HAS_FWOWN_SUPPORT=y
+# HAS_MU_MIMO_SUPPORT=n
+# HAS_FALCON_MURU_SUPPORT=y
+# HAS_RX_SCATTER=n
+# HAS_HDR_TRANS_TX_SUPPORT=y
+# HAS_HDR_TRANS_RX_SUPPORT=y
+# HAS_HW_TX_AMSDU_SUPPORT=n
+# HAS_DOT11_VHT_SUPPORT=y
+# HAS_DOT11_HE_SUPPORT=n
+# HAS_NEW_RATE_ADAPT_SUPPORT=n
+# HAS_RATE_ADAPT_AGBS_SUPPORT=y
+# HAS_RACTRL_FW_OFFLOAD_SUPPORT=y
+################################################################
+
+
+
+
+
+
+
+
+
+
+
+
+#ifdef MT7626
+ifneq ($(findstring mt7626,$(CHIPSET)),)
+#------ Chip HW/SW definitions ------#
+HAS_MT_RF=y
+HAS_MT_BBP=y
+HAS_MT_MAC=y
+HAS_MT_DMAC=y
+HAS_INF_PCI=y
+HAS_MAC_PCI=y
+HAS_INF_RBUS=y
+HAS_CUT_THROUGH=y
+HAS_NEED_ROM_PATCH=y
+HAS_FWOWN_SUPPORT=y
+HAS_MU_MIMO_SUPPORT=y
+HAS_HDR_TRANS_TX_SUPPORT=y
+HAS_HDR_TRANS_RX_SUPPORT=y
+HAS_HW_TX_AMSDU_SUPPORT=y
+HAS_DOT11_VHT_SUPPORT=y
+HAS_RATE_ADAPT_AGBS_SUPPORT=y
+HAS_RACTRL_FW_OFFLOAD_SUPPORT=y
+
+WFLAGS += -DMT7626 -DBCN_OFFLOAD_SUPPORT -DUNIFY_FW_CMD
+WFLAGS += -DMAC_INIT_OFFLOAD
+WFLAGS += -DPKT_BUDGET_CTRL_SUPPORT
+WFLAGS += -DSTA_LP_PHASE_2_SUPPORT -DCONFIG_PM_BIT_HW_MODE -DCONFIG_PM
+
+ifeq ($(HAS_FPGA_MODE),y)
+WFLAGS += -DP18_FPGA
+WFLAGS += -DMT7663_FPGA
+WFLAGS += -DMT7626_FPGA
+WFLAGS += -DCONFIG_FPGA_MODE
+HAS_NEED_ROM_PATCH=n
+endif
+endif
+#endif /* End of MT7626 */
+
+
+
+
+################################################################
+# Chipset Compiler Flag
+################################################################
+#------ Chip Feature ------#
+ifeq ($(HAS_MT_RF),y)
+WFLAGS += -DMT_RF -DRTMP_RF_RW_SUPPORT
+endif
+ifeq ($(HAS_MT_BBP),y)
+WFLAGS += -DMT_BBP
+endif
+ifeq ($(HAS_MT_MAC),y)
+WFLAGS += -DMT_MAC
+endif
+ifeq ($(HAS_INF_PCI),y)
+WFLAGS += -DRTMP_PCI_SUPPORT
+endif
+ifeq ($(HAS_MAC_PCI),y)
+WFLAGS += -DRTMP_MAC_PCI
+endif
+ifeq ($(HAS_INF_RBUS),y)
+WFLAGS += -DRTMP_RBUS_SUPPORT
+endif
+ifeq ($(HAS_INF_USB),y)
+WFLAGS += -DRTMP_USB_SUPPORT
+endif
+ifeq ($(HAS_MAC_USB),y)
+WFLAGS += -DRTMP_MAC_USB
+endif
+ifeq ($(HAS_CUT_THROUGH),y)
+WFLAGS += -DCUT_THROUGH -DCUT_THROGH_DBG
+endif
+ifeq ($(HAS_RX_CUT_THROUGH),y)
+WFLAGS += -DRX_CUT_THROUGH
+endif
+ifeq ($(HAS_CUT_THROUGH_DBG),y)
+WFLAGS += -DCUT_THROUGH_DBG
+endif
+ifeq ($(HAS_NEED_ROM_PATCH), y)
+WFLAGS += -DNEED_ROM_PATCH
+endif
+ifeq ($(HAS_FWOWN_SUPPORT),y)
+WFLAGS += -DCONFIG_FWOWN_SUPPORT
+endif
+ifeq ($(HAS_MU_MIMO_SUPPORT),y)
+ifneq ($(findstring AP,$(RT28xx_MODE)),) #Need to Reivew
+WFLAGS += -DCFG_SUPPORT_MU_MIMO
+endif
+endif
+ifeq ($(HAS_MU_RA_SUPPORT),y)
+WFLAGS += -DCFG_SUPPORT_MU_MIMO_RA
+endif
+ifeq ($(HAS_FALCON_MURU_SUPPORT),y)
+WFLAGS += -DCFG_SUPPORT_FALCON_MURU
+endif
+ifeq ($(HAS_RX_SCATTER),y)
+WFLAGS += -DRX_SCATTER
+endif
+ifeq ($(HAS_HDR_TRANS_TX_SUPPORT),y)
+WFLAGS += -DHDR_TRANS_TX_SUPPORT
+endif
+ifeq ($(HAS_HDR_TRANS_RX_SUPPORT),y)
+WFLAGS += -DHDR_TRANS_RX_SUPPORT
+endif
+ifeq ($(HAS_HW_TX_AMSDU_SUPPORT),y)
+WFLAGS += -DHW_TX_AMSDU_SUPPORT
+endif

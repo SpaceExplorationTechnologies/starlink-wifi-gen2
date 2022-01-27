@@ -1,0 +1,14 @@
+Index: fstools-2016-12-04-84b530a7/libfstools/mtd.c
+===================================================================
+--- fstools-2016-12-04-84b530a7.orig/libfstools/mtd.c	2017-08-29 15:00:46.824333000 +0800
++++ fstools-2016-12-04-84b530a7/libfstools/mtd.c	2017-08-29 15:02:52.848520000 +0800
+@@ -218,6 +218,9 @@
+ 	if (v->type == UBIVOLUME && deadc0de == 0xffffffff) {
+ 		return FS_JFFS2;
+ 	}
++	if (v->type == NANDFLASH && deadc0de == 0xffffffff) {
++		return FS_JFFS2;
++	}
+ 
+ 	return FS_NONE;
+ }

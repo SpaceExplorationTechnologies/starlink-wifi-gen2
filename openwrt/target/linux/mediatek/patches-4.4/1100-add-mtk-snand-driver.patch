@@ -1,0 +1,21 @@
+diff --git a/drivers/mtd/Kconfig b/drivers/mtd/Kconfig
+index 1344a0ee..84626d61 100644
+--- a/drivers/mtd/Kconfig
++++ b/drivers/mtd/Kconfig
+@@ -375,4 +375,6 @@ source "drivers/mtd/ubi/Kconfig"
+ 
+ source "drivers/mtd/nmbm/Kconfig"
+ 
++source "drivers/mtd/mtk-snand/Kconfig"
++
+ endif # MTD
+diff --git a/drivers/mtd/Makefile b/drivers/mtd/Makefile
+index bcfc5cd9..cc0ae82e 100644
+--- a/drivers/mtd/Makefile
++++ b/drivers/mtd/Makefile
+@@ -39,3 +39,5 @@ obj-$(CONFIG_MTD_SPI_NOR)	+= spi-nor/
+ obj-$(CONFIG_MTD_UBI)		+= ubi/
+ 
+ obj-$(CONFIG_NMBM)		+= nmbm/
++
++obj-$(CONFIG_MTK_SPI_NAND)	+= mtk-snand/

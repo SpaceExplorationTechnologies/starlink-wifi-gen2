@@ -1,0 +1,26 @@
+Index: wireless_tools.29/iwpriv.c
+===================================================================
+--- wireless_tools.29.orig/iwpriv.c	2007-02-17 09:17:43.000000000 +0800
++++ wireless_tools.29/iwpriv.c	2017-09-21 14:16:35.636889000 +0800
+@@ -259,7 +259,8 @@
+ 		int		priv_num)	/* Number of descriptions */
+ {
+   struct iwreq	wrq;
+-  u_char	buffer[4096];	/* Only that big in v25 and later */
++  //u_char	buffer[4096];	/* Only that big in v25 and later */
++  u_char        buffer[8192*2]; /* this buffer size for get_site_survey length */
+   int		i = 0;		/* Start with first command arg */
+   int		k;		/* Index in private description table */
+   int		temp;
+@@ -425,6 +426,11 @@
+   else
+     {
+       wrq.u.data.length = 0L;
++      if(0 == strcmp("get_site_survey", cmdname))
++      {
++              wrq.u.data.length = 120*128; // 120 is per entry size, 128 is counter of entry
++              fprintf(stderr, "(%d)cmdname %s\n",cmdname);
++      }
+     }
+ 
+   strncpy(wrq.ifr_name, ifname, IFNAMSIZ);

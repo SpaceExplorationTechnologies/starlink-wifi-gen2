@@ -1,0 +1,13 @@
+Index: linux-4.4.x/drivers/Makefile
+===================================================================
+--- linux-4.4.x.orig/drivers/Makefile	2017-07-17 13:14:54.978387000 +0800
++++ linux-4.4.x/drivers/Makefile	2017-07-17 13:19:19.987744000 +0800
+@@ -4,7 +4,7 @@
+ # 15 Sep 2000, Christoph Hellwig <hch@infradead.org>
+ # Rewritten to use lists instead of if-statements.
+ #
+-subdir-ccflags-y += -Werror
++#subdir-ccflags-y += -Werror
+ 
+ obj-y				+= irqchip/
+ obj-y				+= bus/

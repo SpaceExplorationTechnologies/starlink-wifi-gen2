@@ -1,0 +1,187 @@
+diff --git a/arch/arm/boot/dts/mt7623.dtsi b/arch/arm/boot/dts/mt7623.dtsi
+index 2880bcc..21a6ea6 100644
+--- a/arch/arm/boot/dts/mt7623.dtsi
++++ b/arch/arm/boot/dts/mt7623.dtsi
+@@ -1226,6 +1226,14 @@
+ 		status = "disabled";
+ 	};
+ 
++        hnat: hnat@1b000000 {
++                compatible = "mediatek,mtk-hnat";
++                reg = <0 0x1b100000 0 0x3000>;
++                resets = <&ethsys 0>;
++                reset-names = "mtketh";
++                status = "disabled";
++        };
++
+ 	crypto: crypto@1b240000 {
+ 		compatible = "mediatek,eip97-crypto";
+ 		reg = <0 0x1b240000 0 0x20000>;
+diff --git a/arch/arm/boot/dts/mt7623a-evb.dts b/arch/arm/boot/dts/mt7623a-evb.dts
+index dd8e3eb..a9dc061 100644
+--- a/arch/arm/boot/dts/mt7623a-evb.dts
++++ b/arch/arm/boot/dts/mt7623a-evb.dts
+@@ -16,7 +16,7 @@
+ #include "mt7623.dtsi"
+ 
+ / {
+-	model = "MediaTek MT7623 evaluation board";
++	model = "MediaTek MT7623a NAND evaluation board";
+ 	compatible = "mediatek,mt7623-evb", "mediatek,mt7623";
+ 
+ 	chosen {
+@@ -150,6 +150,13 @@
+ 	};
+ };
+ 
++&hnat {
++        mtketh-wan = "wan";
++        mtketh-max-gmac = <1>;
++        mtkdsa-wan-port = <4>;
++        status = "okay";
++};
++
+ &i2c0 {
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&i2c0_pins_a>;
+@@ -172,7 +179,7 @@
+ 	pinctrl-0 = <&i2c2_pins_a>;
+ 	status = "okay";
+ };
+-
++/*
+ &mmc0 {
+ 	pinctrl-names = "default", "state_uhs";
+ 	pinctrl-0 = <&mmc0_pins_default>;
+@@ -185,7 +192,7 @@
+ 	vqmmc-supply = <&mt6323_vio18_reg>;
+ 	non-removable;
+ };
+-
++*/
+ &mmc1 {
+ 	pinctrl-names = "default", "state_uhs";
+ 	pinctrl-0 = <&mmc1_pins_default>;
+@@ -211,6 +218,42 @@
+ 		nand-ecc-mode = "hw";
+ 		nand-ecc-strength = <12>;
+ 		nand-ecc-step-size = <1024>;
++		partitions {
++                       compatible = "fixed-partitions";
++                       #address-cells = <1>;
++                       #size-cells = <1>;
++
++                       partition@0 {
++                               label = "Preloader";
++                               reg = <0x00000 0x0040000>;
++                               read-only;
++                       };
++
++                       partition@40000 {
++                               label = "Bootloader";
++                               reg = <0x40000 0x0080000>;
++                       };
++
++                       partition@c0000 {
++                               label = "Config";
++                               reg = <0xc0000 0x0040000>;
++                       };
++
++                       partition@100000 {
++                               label = "Factory";
++                               reg = <0x100000 0x0040000>;
++                       };
++
++                       partition@140000 {
++                               label = "Kernel";
++                               reg = <0x140000 0x2000000>;
++                       };
++
++                       partition@2140000 {
++                               label = "User_data";
++                               reg = <0x2140000 0x4000000>;
++                       };
++		};
+ 	};
+ };
+ 
+@@ -279,7 +322,7 @@
+ 			bias-pull-up;
+ 		};
+ 	};
+-
++/*
+ 	mmc0_pins_default: mmc0default {
+ 		pins_cmd_dat {
+ 			pinmux = <MT7623_PIN_111_MSDC0_DAT7_FUNC_MSDC0_DAT7>,
+@@ -333,7 +376,7 @@
+ 			bias-pull-up;
+ 		};
+ 	};
+-
++*/
+ 	mmc1_pins_default: mmc1default {
+ 		pins_cmd_dat {
+ 			pinmux = <MT7623_PIN_107_MSDC1_DAT0_FUNC_MSDC1_DAT0>,
+diff --git a/arch/arm/boot/dts/mt7623n-evb.dts b/arch/arm/boot/dts/mt7623n-evb.dts
+index e1f7431..c44752b 100644
+--- a/arch/arm/boot/dts/mt7623n-evb.dts
++++ b/arch/arm/boot/dts/mt7623n-evb.dts
+@@ -21,6 +21,7 @@
+ 
+ 	chosen {
+ 		stdout-path = &uart2;
++		bootargs = "earlyprintk block2mtd.block2mtd=/dev/mmcblk0,65536,eMMC,5 mtdparts=eMMC:256k(mbr)ro,512k(uboot),256k(Config),256k(Factory),32M(Kernel),2048M(usrdata)";
+ 	};
+ 
+ 	cpus {
+@@ -183,6 +184,13 @@
+ 	};
+ };
+ 
++&hnat {
++        mtketh-wan = "wan";
++        mtketh-max-gmac = <1>;
++        mtkdsa-wan-port = <4>;
++        status = "okay";
++};
++
+ &hdmi0 {
+ 	status = "okay";
+ 
+@@ -258,7 +266,7 @@
+ 	vmmc-supply = <&mt6323_vmch_reg>;
+ 	vqmmc-supply = <&mt6323_vmc_reg>;
+ };
+-
++/*
+ &nandc {
+ 	status = "okay";
+ 	pinctrl-names = "default";
+@@ -271,7 +279,7 @@
+ 		nand-ecc-step-size = <1024>;
+ 	};
+ };
+-
++*/
+ &pcie {
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&pcie_default>;
+@@ -363,7 +371,7 @@
+ 			bias-disable;
+ 		};
+ 	};
+-
++/*
+ 	nand_pins_default: nanddefault {
+ 		pins_dat {
+ 			pinmux = <MT7623_PIN_111_MSDC0_DAT7_FUNC_NLD7>,
+@@ -380,7 +388,7 @@
+ 			bias-pull-up;
+ 		};
+ 	};
+-
++*/
+ 	mmc0_pins_default: mmc0default {
+ 		pins_cmd_dat {
+ 			pinmux = <MT7623_PIN_111_MSDC0_DAT7_FUNC_MSDC0_DAT7>,

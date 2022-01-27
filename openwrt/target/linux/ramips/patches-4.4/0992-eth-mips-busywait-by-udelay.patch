@@ -1,0 +1,11 @@
+--- a/drivers/net/ethernet/mediatek/mtk_eth_soc.c	2019-03-04 14:48:53.702507431 +0800
++++ b/drivers/net/ethernet/mediatek/mtk_eth_soc.c	2019-03-04 14:48:53.702507431 +0800
+@@ -84,7 +84,7 @@
+ 			return 0;
+ 		if (time_after(jiffies, t_start + PHY_IAC_TIMEOUT))
+ 			break;
+-		usleep_range(10, 20);
++		udelay(10);
+ 	}
+ 
+ 	dev_err(eth->dev, "mdio: MDIO timeout\n");

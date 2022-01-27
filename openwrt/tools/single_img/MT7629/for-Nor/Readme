@@ -1,0 +1,8 @@
+mk_single_img.sh
+
+  The single image is based on MTK's reference NOR partition layout, which is
+	Bootloader	0x00000~0x60000
+	NVRAM		0x60000~0x70000
+	Factory		0x70000~0xB0000
+	Kernel		0xB0000~
+  If your the partition layout is different, please modify mk_single_img.sh.

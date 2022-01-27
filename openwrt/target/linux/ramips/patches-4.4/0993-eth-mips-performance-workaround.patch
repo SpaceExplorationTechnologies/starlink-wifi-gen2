@@ -1,0 +1,55 @@
+diff --git a/drivers/net/ethernet/mediatek/mtk_eth_soc.c b/drivers/net/ethernet/mediatek/mtk_eth_soc.c
+index f5aee52a..ea0942f4 100644
+--- a/drivers/net/ethernet/mediatek/mtk_eth_soc.c
++++ b/drivers/net/ethernet/mediatek/mtk_eth_soc.c
+@@ -723,6 +723,8 @@ static int mtk_tx_map(struct sk_buff *skb, struct net_device *dev,
+ 
+ #if defined(CONFIG_NET_MEDIATEK_HW_QOS)
+ 	qid = skb->mark & (MTK_QDMA_TX_MASK);
++#else
++	qid = mac->id;
+ #endif
+ 
+ 	mapped_addr = dma_map_single(eth->dev, skb->data,
+@@ -800,8 +802,8 @@ static int mtk_tx_map(struct sk_buff *skb, struct net_device *dev,
+ 				(!nr_frags * TX_DMA_LS0)) | QID_LOW_BITS(qid));
+ 	WRITE_ONCE(itxd->txd4, txd4 | QID_HIGH_BITS(qid));
+ 
+-	netdev_sent_queue(dev, skb->len);
+-	skb_tx_timestamp(skb);
++	//netdev_sent_queue(dev, skb->len);
++	//skb_tx_timestamp(skb);
+ 
+ 	ring->next_free = mtk_qdma_phys_to_virt(ring, txd->txd2);
+ 	atomic_sub(n_desc, &ring->free_count);
+@@ -1172,7 +1174,7 @@ static int mtk_poll_tx(struct mtk_eth *eth, int budget)
+ 	for (i = 0; i < MTK_MAC_COUNT; i++) {
+ 		if (!eth->netdev[i] || !done[i])
+ 			continue;
+-		netdev_completed_queue(eth->netdev[i], done[i], bytes[i]);
++		//netdev_completed_queue(eth->netdev[i], done[i], bytes[i]);
+ 		total += done[i];
+ 	}
+ 
+@@ -1305,6 +1307,8 @@ static int mtk_tx_alloc(struct mtk_eth *eth)
+ 		MTK_QTX_DRX_PTR);
+ 	mtk_w32(eth, (QDMA_RES_THRES << 8) | QDMA_RES_THRES, MTK_QTX_CFG(0));
+ 
++	mtk_w32(eth, BIT(31), MTK_QTX_SCH(0));
++
+ 	return 0;
+ 
+ no_tx_mem:
+diff --git a/drivers/net/ethernet/mediatek/mtk_eth_soc.h b/drivers/net/ethernet/mediatek/mtk_eth_soc.h
+index b401e46c..2a30528f 100644
+--- a/drivers/net/ethernet/mediatek/mtk_eth_soc.h
++++ b/drivers/net/ethernet/mediatek/mtk_eth_soc.h
+@@ -24,7 +24,7 @@
+ #define	MTK_MAX_RX_LENGTH	1536
+ #define MTK_TX_DMA_BUF_LEN	0x3fff
+ #define MTK_DMA_SIZE		2048
+-#define MTK_NAPI_WEIGHT		256
++#define MTK_NAPI_WEIGHT		64
+ #define MTK_MAC_COUNT		2
+ #define MTK_RX_ETH_HLEN		(VLAN_ETH_HLEN + VLAN_HLEN + ETH_FCS_LEN)
+ #define MTK_RX_HLEN		(NET_SKB_PAD + MTK_RX_ETH_HLEN + NET_IP_ALIGN)

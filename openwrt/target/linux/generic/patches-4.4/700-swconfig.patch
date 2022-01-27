@@ -1,0 +1,10 @@
+--- a/include/uapi/linux/Kbuild
++++ b/include/uapi/linux/Kbuild
+@@ -388,6 +388,7 @@ header-y += stddef.h
+ header-y += string.h
+ header-y += suspend_ioctls.h
+ header-y += swab.h
++header-y += switch.h
+ header-y += synclink.h
+ header-y += sysctl.h
+ header-y += sysinfo.h

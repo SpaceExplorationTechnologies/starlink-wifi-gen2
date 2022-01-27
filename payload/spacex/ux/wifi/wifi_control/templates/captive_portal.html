@@ -1,0 +1,27 @@
+<!doctype html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Starlink</title>
+
+    <link rel="stylesheet" type="text/css" href="static/css/normalize.min.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="static/css/layout.css" media="screen">
+
+    <meta name="viewport" content="width=device-width, maximum-scale=1.0, user-scalable=1">
+
+    <script type="text/javascript" src="static/js/core.js"></script>
+
+    <link rel="shortcut icon" href="static/favicon.ico">
+</head>
+<div class="wrapper">
+    <div class="section">
+        {{ template "logo.html" . }}
+        {{ template "form.html" . }}
+    </div>
+</div>
+
+{{if .IsInitialPrompt}}
+<script type="text/javascript">
+    initStarlink();
+</script>
+{{end}}

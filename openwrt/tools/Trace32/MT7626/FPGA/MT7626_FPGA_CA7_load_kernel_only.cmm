@@ -1,0 +1,190 @@
+;*****************************************************************************
+;  Copyright Statement:
+;  --------------------
+;  This software is protected by Copyright and the information contained
+;  herein is confidential. The software may not be copied and the information
+;  contained herein may not be used or disclosed except with the written
+;  permission of MediaTek Inc. (C) 2017
+;
+;*****************************************************************************
+;;================================================
+;; PURPOSE:     FPGA Bring Up
+;; CREATE_DATE: 2017/08/31
+;; NOTE:
+
+;;================================================
+; Specify Core Number
+;=================================================
+&NR_CPUS=1
+
+;=================================================
+; Initialize CPU
+;=================================================
+;SYStem.reset
+SYStem.OPTION TRST ON
+SYStem.OPTION ENRESET ON
+SYStem.Option ResBreak OFF
+SYStem.Option WaitReset OFF
+SYStem.JtagClock 10.MHz
+
+if &NR_CPUS==1
+(
+    SYSTEM.CPU CortexA7MPCore
+)
+else
+(
+    SYSTEM.CPU CortexA7MPCore
+)
+
+if &NR_CPUS==1
+(
+  ;Setting Core debug register access
+    SYSTEM.CONFIG CORENUMBER 1;
+    SYSTEM.MULTICORE COREBASE 0x80810000;
+    ;SYSTEM.CONFIG CTIBASE 0x80818000;
+    ;SYSTEM.CONFIG PMUBASE 0x80811000;
+)
+else
+(
+  ;SYSTEM.MULTICORE COREBASE 0x80070000 0x80072000;
+    SYSTEM.CONFIG CORENUMBER 2;
+    SYSTEM.CONFIG COREBASE 0x80810000 0x80812000;
+    ;SYSTEM.CONFIG CTIBASE  0x80818000 0x80819000;
+    ;SYSTEM.CONFIG PMUBASE  0x80811000 0x80813000;
+)
+
+;=================================================
+; Attach and Stop CPU
+;=================================================
+SYStem.Up
+wait 200.us
+
+;D.S SD:0x10200000 %LE %LONG 0x00000100 ;Set L2C size to 256KB
+;D.S SD:0x10200000 %LE %LONG 0x00001100 ;Enable L2C share SRAM
+
+; disable DABORT and PABORT breakpoint
+tronchip.set dabort off
+tronchip.set pabort off
+tronchip.set undef off
+tronchip.set irq off
+
+Break.Delete /ALL
+
+D.S C15:0x1 0				; Turn off MMU
+
+; disable wdt (debug purpose)
+D.S SD:0x10212000 %LE %LONG 0x22000000
+
+;Disable acinactm
+;d.s c:0x1020002c  %le %long 0x8
+;d.s c:0x1020022c  %le %long 0x8
+
+;=================================================
+; Initialize EMI
+;=================================================
+&init_emi=1 ; 0: not init
+            ; 1: init
+IF &init_emi==1
+(
+  ;Init DDR
+    do MT7626_FPGA_DDR.cmm
+    wait 6000.ms
+)
+;
+;Add dram test
+;
+Data.Set 0x40000000 %Long 0xFFFFFFFF
+&ret=Data.Long(D:0x40000000)
+PRINT &ret
+IF &ret!=0xFFFFFFFF
+(
+    PRINT %ERROR "DRAM: 0x40000000!=0xFFFFFFFF !"
+    DIALOG.OK "ERROR: DRAM: 0x40000000!=0xFFFFFFFF !"
+    STOP
+)
+Data.Set 0x40000000--0x400002FF %Long 0xFFFFFFFF
+Data.Set 0x50000000--0x500002FF %Long 0xFFFFFFFF
+Data.ComPare 0x40000000--0x400002FF 0x50000000
+IF FOUND()
+(
+    PRINT %ERROR "Dram compare error, found at address 0x" ADDRESS.OFFSET(TRACK.ADDRESS())
+    DIALOG.OK "ERROR: Dram R/W test error !! "
+    STOP
+)
+Data.Set 0x40000000 %Long 0x0
+Data.Set 0x40000000--0x400002FF %Long 0x0
+Data.Set 0x50000000--0x500002FF %Long 0x0
+
+print "DRAM R/W test done."
+
+;=================================================
+; Test bitfile basic function
+;=================================================
+;; print uart log: Hello,MT7626 (115200n1)
+d.s c:0x1100200c %le %long 0x3
+d.s c:0x11002024 %le %long 0x3
+d.s c:0x1100200c %le %long 0x83
+d.s c:0x11002000 %le %long 0x1
+d.s c:0x11002004 %le %long 0x0
+d.s c:0x11002028 %le %long 0x67
+d.s c:0x1100202c %le %long 0x33
+d.s c:0x1100200c %le %long 0x3
+d.s c:0x11002000 %le %long 0x0d ;CR
+d.s c:0x11002000 %le %long 0x0a ;LF
+d.s c:0x11002000 %le %long 0x48 ;H
+d.s c:0x11002000 %le %long 0x65 ;e
+d.s c:0x11002000 %le %long 0x6c ;l
+d.s c:0x11002000 %le %long 0x6c ;l
+d.s c:0x11002000 %le %long 0x6f ;o
+d.s c:0x11002000 %le %long 0x2c ;,
+d.s c:0x11002000 %le %long 0x20 ;
+d.s c:0x11002000 %le %long 0x4d ;M
+d.s c:0x11002000 %le %long 0x54 ;T
+d.s c:0x11002000 %le %long 0x37 ;7
+d.s c:0x11002000 %le %long 0x36 ;6
+d.s c:0x11002000 %le %long 0x32 ;2
+d.s c:0x11002000 %le %long 0x36 ;6
+d.s c:0x11002000 %le %long 0x0d ;CR
+d.s c:0x11002000 %le %long 0x0a ;LF
+
+print "Print UART log done."
+
+;=================================================
+; Load DTB & Image to dram.
+;=================================================
+print "loading DTB first..."
+D.LOAD.BINARY .\mt7626-fpga.dtb 0x40001000 /noclear
+
+print "loading Linux image..."
+D.LOAD.BINARY .\lede-mediatek-mt7626-Image-initramfs 0x40008000 /noclear
+
+;; Set kernel entry breakpoint
+;Break.RESet
+;Break.Set start_kernel /onchip
+
+IF &NR_CPUS==2
+(
+  ;Here SPM power-on core1 first...
+    ;D.LOAD.BINARY .\boot-a32-secure.bin 0x40000000
+
+    ;core.select 1
+    ;r.s pc 0x40000000
+    core.select 0
+    r.s pc 0x40008000
+    R.Set R2  0x40001000	;boot args address or dtb pointer
+)
+ELSE IF &NR_CPUS==1
+(
+    core.select 0
+    r.s pc 0x40008000       ;kernel entry
+
+  ; Set register(3 args)
+    R.Set R0  0x0
+    ;R.Set R1  0x7D0		;machine id, #define MACH_TYPE_MT85XX  2000
+    R.Set R2  0x40001000	;boot args address or dtb pointer
+)
+
+GO
+;d.l
+
+enddo

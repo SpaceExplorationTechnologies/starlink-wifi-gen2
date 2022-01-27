@@ -1,0 +1,3 @@
+# <file system> <mount point> <type> <options> <dump> <pass>
+/dev/ubi0_0 /config ubifs defaults,noatime,noexec,rw 0 0
+/dev/ubi0_1 /log ubifs defaults,noatime,noexec,rw 0 0

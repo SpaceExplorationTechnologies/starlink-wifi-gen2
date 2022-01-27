@@ -1,0 +1,5 @@
+config MT7622_SF
+	tristate "MT7622/29 serial flash helper"
+	help
+	  Helper driver used for MT7622/29 to access extra serial falsh features
+	  e.g. Unique ID and SFDP

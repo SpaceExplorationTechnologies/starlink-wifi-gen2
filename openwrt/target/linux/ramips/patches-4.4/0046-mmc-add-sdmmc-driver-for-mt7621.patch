@@ -1,0 +1,33 @@
+From 6790f472689dd32de40cacdf80c2b8e404784d19 Mon Sep 17 00:00:00 2001
+From: Weijie Gao <weijie.gao@mediatek.com>
+Date: Mon, 28 Jan 2019 11:25:56 +0800
+Subject: [PATCH] drivers: mmc host: add initial sd/mmc support for mt7621
+
+Add initial sd/mmc support for mt7621
+
+Signed-off-by: Weijie Gao <weijie.gao@mediatek.com>
+---
+ drivers/mmc/host/Kconfig               |    2 +
+ drivers/mmc/host/Makefile              |    2 +
+ 2 files changed, 4 insertions(+)
+
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index 2e6d2fff..ef544a76 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -786,3 +786,5 @@ config MMC_MTK
+ 	  If you have a machine with a integrated SD/MMC card reader, say Y or M here.
+ 	  This is needed if support for any SD/SDIO/MMC devices is required.
+ 	  If unsure, say N.
++
++source "drivers/mmc/host/mt7621-sd/Kconfig"
+diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+index 3595f83e..0aa6fb5a 100644
+--- a/drivers/mmc/host/Makefile
++++ b/drivers/mmc/host/Makefile
+@@ -79,3 +79,5 @@ obj-$(CONFIG_MMC_SDHCI_ST)		+= sdhci-st.o
+ ifeq ($(CONFIG_CB710_DEBUG),y)
+ 	CFLAGS-cb710-mmc	+= -DDEBUG
+ endif
++
++obj-$(CONFIG_MMC_MT7621)		+= mt7621-sd/

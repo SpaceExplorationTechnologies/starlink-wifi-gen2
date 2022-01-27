@@ -1,0 +1,186 @@
+diff --git a/networking/brctl.c b/networking/brctl.c
+index b732096..151b507
+--- a/networking/brctl.c
++++ b/networking/brctl.c
+@@ -23,6 +23,7 @@
+ //usage:	)
+ //usage:     "\n	addbr BRIDGE		Create BRIDGE"
+ //usage:     "\n	delbr BRIDGE		Delete BRIDGE"
++//usage:     "\n	showmacs BRIDGE		Show fdb of BRIDGE"
+ //usage:     "\n	addif BRIDGE IFACE	Add IFACE to BRIDGE"
+ //usage:     "\n	delif BRIDGE IFACE	Delete IFACE from BRIDGE"
+ //usage:	IF_FEATURE_BRCTL_FANCY(
+@@ -39,6 +40,11 @@
+ #include "libbb.h"
+ #include <linux/sockios.h>
+ #include <net/if.h>
++#include <stdio.h>
++#include <unistd.h>
++#include <dirent.h>
++#include <string.h>
++#include <sys/stat.h>
+
+ #ifndef SIOCBRADDBR
+ # define SIOCBRADDBR BRCTL_ADD_BRIDGE
+@@ -58,6 +64,9 @@
+ #ifndef MAX_PORTS
+ # define MAX_PORTS 32
+ #endif
++#ifndef MAX_FDBS
++# define MAX_FDBS 256
++#endif
+
+ /* Use internal number parsing and not the "exact" conversion.  */
+ /* #define BRCTL_USE_INTERNAL 0 */ /* use exact conversion */
+@@ -114,6 +123,15 @@ struct __bridge_info {
+ 	uint32_t topology_change_timer_value;
+ 	uint32_t gc_timer_value;
+ };
++struct __fdb_entry {
++	uint8_t  mac_addr[6];
++	uint8_t  port_no;
++	uint8_t  is_local;
++	uint32_t ageing_timer_value;
++	uint8_t  port_hi;
++	uint8_t  pad0;
++	uint16_t unused;
++};
+ /* end <linux/if_bridge.h> */
+
+ /* FIXME: These 4 funcs are not really clean and could be improved */
+@@ -166,6 +184,68 @@ static void arm_ioctl(unsigned long *args,
+ 	args[2] = arg2;
+ 	args[3] = 0;
+ }
++
++static int __portno_to_name(const char *dir, int port_no, char *ifname, size_t size)
++{
++	DIR *d;
++	struct dirent *f;
++	struct stat st;
++	int ret;
++	char path[512], portno[16];
++	FILE *ff;
++
++	d = opendir(dir);
++	if (!d)
++		return -1;
++
++	while (1) {
++		f = readdir(d);
++		if (!f)
++				break;
++
++		if (!strcmp(f->d_name, "."))
++				continue;
++
++		if (!strcmp(f->d_name, ".."))
++				continue;
++
++		snprintf(path, sizeof(path), "%s/%s", dir, f->d_name);
++
++		ret = stat(path, &st);
++		if (ret)
++				continue;
++
++		if (!S_ISDIR(st.st_mode))
++				continue;
++
++		snprintf(path, sizeof(path), "%s/%s/port_no", dir, f->d_name);
++		ff = fopen(path, "r");
++		if (!ff)
++			continue;
++		ret = fread(portno, 1, sizeof(portno), ff);
++		fclose(ff);
++		if(ret <= 0)
++			continue;
++
++		portno[ret] = 0;
++
++		ret = strtoul(portno, NULL, 0);
++
++		if (port_no == ret) {
++			strncpy(ifname, f->d_name, size);
++			closedir(d);
++			return 0;
++		}
++	}
++
++	closedir(d);
++	return -1;
++}
++
++static int portno_to_name(unsigned port_no, char *ifname, size_t size)
++{
++	return __portno_to_name("/sys/class/net/br-lan/brif", port_no, ifname, size);
++}
+ #endif
+
+
+@@ -177,7 +257,7 @@ int brctl_main(int argc UNUSED_PARAM, char **argv)
+ 	IF_FEATURE_BRCTL_FANCY(
+ 		"stp\0"
+ 		"setageing\0" "setfd\0" "sethello\0" "setmaxage\0"
+-		"setpathcost\0" "setportprio\0" "setbridgeprio\0"
++		"setpathcost\0" "setportprio\0" "setbridgeprio\0" "showmacs\0"
+ 	)
+ 	IF_FEATURE_BRCTL_SHOW("show\0");
+
+@@ -185,7 +265,7 @@ int brctl_main(int argc UNUSED_PARAM, char **argv)
+ 		IF_FEATURE_BRCTL_FANCY(,
+ 			ARG_stp,
+ 			ARG_setageing, ARG_setfd, ARG_sethello, ARG_setmaxage,
+-			ARG_setpathcost, ARG_setportprio, ARG_setbridgeprio
++			ARG_setpathcost, ARG_setportprio, ARG_setbridgeprio, ARG_showmacs
+ 		)
+ 		IF_FEATURE_BRCTL_SHOW(, ARG_show)
+ 	};
+@@ -196,9 +276,12 @@ int brctl_main(int argc UNUSED_PARAM, char **argv)
+ 	char *br, *brif;
+
+ 	argv++;
++	if (!*argv)
++		bb_show_usage();
+ 	while (*argv) {
+ #if ENABLE_FEATURE_BRCTL_FANCY
+ 		int ifidx[MAX_PORTS];
++		struct __fdb_entry fdbidx[MAX_FDBS];
+ 		unsigned long args[4];
+ 		ifr.ifr_data = (char *) &args;
+ #endif
+@@ -276,11 +359,33 @@ int brctl_main(int argc UNUSED_PARAM, char **argv)
+ 					br, "bridge %s", br);
+ 			goto done;
+ 		}
++		strncpy_IFNAMSIZ(ifr.ifr_name, br);
++
++		if (key == ARG_showmacs) {
++			char ifname[IFNAMSIZ];
++			int num = 0;
++			arm_ioctl(args, BRCTL_GET_FDB_ENTRIES, (unsigned long) fdbidx, MAX_FDBS);
++			num = ioctl(fd, SIOCDEVPRIVATE, &ifr);
++			if(num > 0){
++				int j;
++				printf("protno\t\interface\t\tsourcemac\tis_local?\t\n");
++				for (j = 0; j < num; j++) {
++					unsigned char *ifmac;
++					if (portno_to_name(fdbidx[j].port_no, ifname, sizeof(ifname)))
++							bb_perror_msg_and_die("can't get portnum for index %d", j);
++					printf("%d\t %s\t", fdbidx[j].port_no, ifname);
++					ifmac= (unsigned char *)fdbidx[j].mac_addr;
++					printf("\t%02X:%02X:%02X:%02X:%02X:%02X", ifmac[0], ifmac[1],ifmac[2],ifmac[3],ifmac[4],ifmac[5]);
++					printf(fdbidx[j].is_local? "\tyes\n" : "\tno\n");
++				}
++			} else
++				printf("No such device\n");
++			goto done;
++		}
+
+-		if (!*argv) /* all but 'addbr/delbr' need at least two arguments */
++		if (!*argv)
+ 			bb_show_usage();
+
+-		strncpy_IFNAMSIZ(ifr.ifr_name, br);
+ 		if (key == ARG_addif || key == ARG_delif) { /* addif or delif */
+ 			brif = *argv;
+ 			ifr.ifr_ifindex = if_nametoindex(brif);

@@ -1,0 +1,12 @@
+Index: libnfnetlink-1.0.1/include/libnfnetlink/linux_nfnetlink.h
+===================================================================
+--- libnfnetlink-1.0.1.orig/include/libnfnetlink/linux_nfnetlink.h	2008-06-18 20:36:57.000000000 +0800
++++ libnfnetlink-1.0.1/include/libnfnetlink/linux_nfnetlink.h	2019-08-30 18:04:36.026372012 +0800
+@@ -47,6 +47,7 @@
+ #define NFNL_SUBSYS_QUEUE		3
+ #define NFNL_SUBSYS_ULOG		4
+ #define NFNL_SUBSYS_COUNT		5
++#define NFNL_SUBSYS_FLOWTABLE		12
+ 
+ #ifdef __KERNEL__
+ 

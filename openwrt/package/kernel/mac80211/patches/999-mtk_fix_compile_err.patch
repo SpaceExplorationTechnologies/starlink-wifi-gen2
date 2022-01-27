@@ -1,0 +1,13 @@
+--- a/compat/backport-4.5.c	2017-10-02 10:55:44.353660648 +0800
++++ b/compat/backport-4.5.c	2017-10-02 10:56:26.244506710 +0800
+@@ -32,8 +32,8 @@
+ 	if (led_cdev->flags & LED_SUSPENDED)
+ 		return 0;
+ 
+-	if (led_cdev->brightness_set_sync)
+-		return led_cdev->brightness_set_sync(led_cdev,
++	if (led_cdev->brightness_set_blocking)
++		return led_cdev->brightness_set_blocking(led_cdev,
+ 							 led_cdev->brightness);
+ 	return -ENOTSUPP;
+ }

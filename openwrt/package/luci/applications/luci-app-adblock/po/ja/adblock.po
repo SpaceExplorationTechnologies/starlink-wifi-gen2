@@ -1,0 +1,379 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: INAGAKI Hiroshi <musashino.open@gmail.com>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 2.0.1\n"
+"Language: ja\n"
+
+msgid "."
+msgstr "。"
+
+msgid "Adblock"
+msgstr "Adblock"
+
+msgid "Adblock Domain Query"
+msgstr "Adblock ドメイン検索"
+
+msgid "Adblock Logfile"
+msgstr "Adblock ログファイル"
+
+msgid "Adblock version"
+msgstr "Adblock バージョン"
+
+msgid "Additional trigger delay in seconds before adblock processing begins."
+msgstr "Adblock の処理が開始されるまでの、追加の遅延時間（秒）です。"
+
+msgid "Advanced"
+msgstr "詳細設定"
+
+msgid "Available blocklist sources."
+msgstr "利用可能なブロックリスト提供元です。"
+
+msgid "Backup directory"
+msgstr "バックアップ先 ディレクトリ"
+
+msgid "Blocked domains (overall)"
+msgstr "ブロック済みドメイン（全体）"
+
+msgid "Blocklist sources"
+msgstr "ブロックリスト提供元"
+
+msgid "Collecting data..."
+msgstr "データ収集中です..."
+
+msgid ""
+"Configuration of the adblock package to block ad/abuse domains by using DNS."
+msgstr ""
+"DNS の利用によって広告/不正ドメインをブロックする、Adblock パッケージの設定で"
+"す。"
+
+msgid "DNS backend"
+msgstr "DNS バックエンド"
+
+msgid "Description"
+msgstr "説明"
+
+msgid "Download Utility (SSL Library)"
+msgstr "ダウンロード ユーティリティ（SSL ライブラリ）"
+
+msgid "Edit Blacklist"
+msgstr "ブラックリストの編集"
+
+msgid "Edit Configuration"
+msgstr "設定の編集"
+
+msgid "Edit Whitelist"
+msgstr "ホワイトリストの編集"
+
+msgid "Enable adblock"
+msgstr "Adblock の有効化"
+
+msgid "Enable blocklist backup"
+msgstr "ブロックリスト バックアップの有効化"
+
+msgid ""
+"Enable memory intense overall sort / duplicate removal on low memory devices "
+"(&lt; 64 MB RAM)"
+msgstr ""
+"メモリー容量の少ないデバイス（RAM 64MB 未満）において、一時ファイル内の全体的"
+"なソート及び重複の除去を有効にします。"
+
+msgid "Enable verbose debug logging"
+msgstr "詳細なデバッグ ログの有効化"
+
+msgid "Enabled"
+msgstr "有効"
+
+msgid "Extra options"
+msgstr "拡張設定"
+
+msgid ""
+"For SSL protected blocklist sources you need a suitable SSL library, e.g. "
+"'libustream-ssl' or the wget 'built-in'."
+msgstr ""
+"SSLで保護されているブロックリストの取得には、適切なSSL ライブラリが必要です。"
+"例: 'libustream-ssl' または wget 'ビルトイン'"
+
+msgid "For further information"
+msgstr "詳細な情報は"
+
+msgid "Force Overall Sort"
+msgstr "全体ソートの強制"
+
+msgid "Force local DNS"
+msgstr "ローカル DNS の強制"
+
+msgid "Input file not found, please check your configuration."
+msgstr "入力ファイルが見つかりません。設定を確認してください。"
+
+msgid "Invalid domain specified!"
+msgstr "無効なドメインが指定されています！"
+
+msgid "Last rundate"
+msgstr "最終実行日時"
+
+msgid "Loading"
+msgstr "読込中"
+
+msgid "No"
+msgstr "いいえ"
+
+msgid ""
+"Note that list URLs and Shallalist category selections are configurable in "
+"the 'Advanced' section."
+msgstr ""
+"リストの URL 及び \"Shalla\" リストのカテゴリー設定は、'詳細設定' セクション"
+"で設定することができます。"
+
+msgid ""
+"Options for further tweaking in case the defaults are not suitable for you."
+msgstr "デフォルト設定が適切でない場合、追加で設定するためのオプションです。"
+
+msgid "Overview"
+msgstr "概要"
+
+msgid ""
+"Please add only one domain per line. Comments introduced with '#' are "
+"allowed - ip addresses, wildcards and regex are not."
+msgstr ""
+"1行に1つのドメインを追加してください。'#' から始まるコメントを記述できます"
+"が、IP アドレスやワイルドカード、正規表現を設定値として使用することはできませ"
+"ん。"
+
+msgid "Query"
+msgstr "検索"
+
+msgid "Query domains"
+msgstr "ドメインの検索"
+
+msgid "Redirect all DNS queries to the local resolver."
+msgstr "全ての DNS クエリをローカル リゾルバにリダイレクトします。"
+
+msgid "Restrict interface trigger to certain interface(s)"
+msgstr "インターフェース トリガーを特定のインターフェースに限定する"
+
+msgid "Resume adblock"
+msgstr "Adblock の再開"
+
+msgid "Runtime information"
+msgstr "実行情報"
+
+msgid "SSL req."
+msgstr "SSL 必須"
+
+msgid ""
+"Space separated list of interfaces that trigger adblock processing. To "
+"disable event driven (re-)starts remove all entries."
+msgstr ""
+"Adblock の処理のトリガーとなる、スペースで区切られたインターフェースのリスト"
+"です。処理を発生させるイベントを無効にするには、全てのエントリーを削除して空"
+"欄にします。"
+
+msgid "Status"
+msgstr "ステータス"
+
+msgid "Suspend / Resume adblock"
+msgstr "Adblock の一時停止/再開"
+
+msgid "Suspend adblock"
+msgstr "Adblock の一時停止"
+
+msgid ""
+"This form allows you to modify the content of the adblock blacklist (%s)."
+"<br />"
+msgstr ""
+"このフォームでは、Adblock ブラックリスト (%s) の内容を変更することができま"
+"す。<br />"
+
+msgid ""
+"This form allows you to modify the content of the adblock whitelist (%s)."
+"<br />"
+msgstr ""
+"このフォームでは、Adblock ホワイトリスト (%s) の内容を変更することができま"
+"す。<br />"
+
+msgid ""
+"This form allows you to modify the content of the main adblock configuration "
+"file (/etc/config/adblock)."
+msgstr ""
+"このフォームでは、メインのAdblock 設定ファイル (/etc/config/adblock) の内容を"
+"変更することができます。"
+
+msgid ""
+"This form allows you to query active block lists for certain domains, e.g. "
+"for whitelisting."
+msgstr ""
+"このフォームでは、現在有効なリスト内で特定のドメインを検索することができま"
+"す。例: ホワイトリスト内"
+
+msgid ""
+"This form shows the syslog output, pre-filtered for adblock related messages "
+"only."
+msgstr ""
+"このフォームには、システムログ内の Adblock に関連するメッセージのみが表示され"
+"ます。"
+
+msgid "Trigger delay"
+msgstr "トリガー遅延"
+
+msgid "View Logfile"
+msgstr "ログファイルを見る"
+
+msgid "Waiting for command to complete..."
+msgstr "コマンドの完了をお待ちください..."
+
+msgid "Yes"
+msgstr "はい"
+
+msgid "active"
+msgstr "動作中"
+
+msgid "n/a"
+msgstr "利用不可"
+
+msgid "no domains blocked"
+msgstr "ブロックされたドメインはありません"
+
+msgid "see online documentation"
+msgstr "オンライン ドキュメントを確認してください"
+
+msgid "suspended"
+msgstr "一時停止中"
+
+#~ msgid ""
+#~ "For further information <a href=\"%s\" target=\"_blank\">see online "
+#~ "documentation</a>"
+#~ msgstr ""
+#~ "詳細な情報は<a href=\"%s\" target=\"_blank\">オンライン ドキュメント</a>を"
+#~ "確認してください。"
+
+#~ msgid "Please edit this file directly in a terminal session."
+#~ msgstr "ターミナル セッションで直接このファイルを編集してください。"
+
+#~ msgid "The file size is too large for online editing in LuCI (&gt; 512 KB)."
+#~ msgstr ""
+#~ "ファイル サイズが大きすぎるため、 LuCI 上でオンライン編集できません（&gt; "
+#~ "512 KB）。"
+
+#~ msgid "Backup options"
+#~ msgstr "バックアップ オプション"
+
+#~ msgid "Restrict interface reload trigger to certain interface(s)"
+#~ msgstr "リロード トリガを特定のインターフェースに限定する"
+
+#~ msgid ""
+#~ "Space separated list of interfaces that trigger a reload action. To "
+#~ "disable reload trigger at all remove all entries."
+#~ msgstr ""
+#~ "リロードのトリガとなる、スペースで区切られたインターフェースのリストです。"
+#~ "リロード トリガを無効にするには、全てのエントリーを削除して空欄にします。"
+
+#~ msgid ""
+#~ "Space separated list of interfaces that trigger a reload action. To "
+#~ "disable reload trigger at all set it to 'false'."
+#~ msgstr ""
+#~ "リロードのトリガとなる、スペースで区切られたインターフェースのリストで"
+#~ "す。'false' に設定した場合、全てのリロード トリガは無効になります。"
+
+#~ msgid ""
+#~ "Please add only one domain per line. Comments introduced with '#' are "
+#~ "allowed - ip addresses, wildcards & regex are not."
+#~ msgstr ""
+#~ "一行に一つのドメインを追加してください。'#' から始まるコメントを記述できま"
+#~ "すが、IPアドレスやワイルドカード、正規表現を設定値として使用することはでき"
+#~ "ません。"
+
+#~ msgid ""
+#~ "). Note that list URLs and Shallalist category selections are not "
+#~ "configurable via Luci."
+#~ msgstr ""
+#~ "）。これらのリストのURLおよびshallaリストの選択済みカテゴリーは、Luciを通"
+#~ "して設定することができません。"
+
+#~ msgid "Available blocklist sources ("
+#~ msgstr "利用可能なブロックリスト提供元です（"
+
+#~ msgid ""
+#~ "File with whitelisted hosts/domains that are allowed despite being on a "
+#~ "blocklist."
+#~ msgstr ""
+#~ "ホワイトリスト ファイル内のホスト/ドメインは、ブロックリストの登録に関わら"
+#~ "ず許可されます。"
+
+#~ msgid "Global options"
+#~ msgstr "一般設定"
+
+#~ msgid "Restrict reload trigger to certain interface(s)"
+#~ msgstr "リロードトリガを特定のインターフェースに限定する"
+
+#~ msgid ""
+#~ "Space separated list of wan interfaces that trigger reload action. To "
+#~ "disable reload trigger set it to 'false'. Default: empty"
+#~ msgstr ""
+#~ "リロード実行のトリガとなる、スペースで区切られたWANインターフェースのリス"
+#~ "トです。リロードトリガを無効にするには、 false を設定します。デフォルト:"
+#~ "（空）"
+
+#~ msgid "Whitelist file"
+#~ msgstr "ホワイトリスト ファイル"
+
+#~ msgid "see list details"
+#~ msgstr "リストの詳細を見る"
+
+#~ msgid "Count"
+#~ msgstr "カウント"
+
+#~ msgid "Do not write status info to flash"
+#~ msgstr "ステータス情報をフラッシュに書き込まない"
+
+#~ msgid "Last update of the blocklists"
+#~ msgstr "ブロックリストの最終更新日時"
+
+#~ msgid "List date/state"
+#~ msgstr "リスト日時/状態"
+
+#~ msgid "Name of the logical lan interface"
+#~ msgstr "論理LANインターフェース名"
+
+#~ msgid "Percentage of blocked packets (before last update, IPv4/IPv6)"
+#~ msgstr "ブロック済みパケットの割合（最終更新以前、IPv4/IPv6）"
+
+#~ msgid "Port of the adblock uhttpd instance"
+#~ msgstr "adblock uhttpdインスタンスのポート"
+
+#~ msgid "Port of the adblock uhttpd instance for https links"
+#~ msgstr "httpsリンク用adblock uhttpdインスタンスのポート"
+
+#~ msgid "Redirect all DNS queries to the local resolver"
+#~ msgstr "全てのDNSクエリをローカルリゾルバにリダイレクト"
+
+#~ msgid ""
+#~ "Skip writing update status information to the config file. Status fields "
+#~ "on this page will not be updated."
+#~ msgstr ""
+#~ "更新ステータス情報をコンフィグファイルに書き込まず、スキップします。この"
+#~ "ページのステータス画面は更新されなくなります。"
+
+#~ msgid "Statistics"
+#~ msgstr "ステータス"
+
+#~ msgid "Timeout for blocklist fetch (seconds)"
+#~ msgstr "ブロックリスト取得の制限時間（秒）"
+
+#~ msgid "Total count of blocked domains"
+#~ msgstr "ブロック済みドメインの合計"
+
+#~ msgid ""
+#~ "When adblock is active, all DNS queries are redirected to the local "
+#~ "resolver in this server by default. You can disable that to allow queries "
+#~ "to external DNS servers."
+#~ msgstr ""
+#~ "adblockがアクティブである時、全てのDNSクエリは既定でこのサーバー上のリゾル"
+#~ "バにリダイレクトされます。外部DNSサーバーへのクエリを許可する場合、この設"
+#~ "定を無効にすることもできます。"

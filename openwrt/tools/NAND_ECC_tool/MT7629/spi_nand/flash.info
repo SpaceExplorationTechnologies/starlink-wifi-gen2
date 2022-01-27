@@ -1,0 +1,4 @@
+#!/bin/sh
+
+# Modify flash name
+FLASH_NAME=1Gb_2K_64

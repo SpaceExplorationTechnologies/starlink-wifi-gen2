@@ -1,0 +1,22 @@
+Index: fstools-2016-12-04-84b530a7/block.c
+===================================================================
+--- fstools-2016-12-04-84b530a7.orig/block.c	2017-08-17 16:10:43.236274000 +0800
++++ fstools-2016-12-04-84b530a7/block.c	2017-08-17 16:11:02.423958000 +0800
+@@ -530,7 +530,7 @@
+ 		printf("\toption\tuuid\t'%s'\n", pr->uuid);
+ 	else
+ 		printf("\toption\tdevice\t'%s'\n", pr->dev);
+-	printf("\toption\tenabled\t'0'\n\n");
++	printf("\toption\tenabled\t'1'\n\n");
+ 
+ 	return 0;
+ }
+@@ -1454,7 +1454,7 @@
+ 	cache_load(0);
+ 	printf("config 'global'\n");
+ 	printf("\toption\tanon_swap\t'0'\n");
+-	printf("\toption\tanon_mount\t'0'\n");
++	printf("\toption\tanon_mount\t'1'\n");
+ 	printf("\toption\tauto_swap\t'1'\n");
+ 	printf("\toption\tauto_mount\t'1'\n");
+ 	printf("\toption\tdelay_root\t'5'\n");

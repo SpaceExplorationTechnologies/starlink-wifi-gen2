@@ -1,0 +1,110 @@
+{
+    "cblAuthDelegate":{
+        // Path to CBLAuthDelegate's database file. e.g. /home/ubuntu/Build/cblAuthDelegate.db
+        // Note: The directory specified must be valid.
+        // The database file (cblAuthDelegate.db) will be created by SampleApp, do not create it yourself.
+        // The database file should only be used for CBLAuthDelegate (don't use it for other components of SDK)
+        "databaseFilePath":"/alexa/cblAuthDelegate.db"
+    },
+    "deviceInfo":{
+        // Unique device serial number. e.g. 123456
+        "deviceSerialNumber":"85161557360756",
+        // Refresh Token populated by running AuthServer.py
+		//"refreshToken":"Atzr|IwEBIBTAEX49z-RkqhWC4WrvamLlY0iC4CqUZV9XPw6YR_HAQhvRAHw7qY3JDT-vWvdJB8l7zkkgtD59KBEQ74JZ4frgTxl4rM8SIstfbWdUkudIUOeocCu9oTap9XJpZIPiUntfqjJEOwpvgTpF_FO6wfpgrJN_2KmlZshoXqEwIBY6KBcWyToZCL7KqMlz_E7sVuaZTe3i9s9PwNJaXJliJsQHPkYWZomPvNMgUMaCoP3eKL6PXojJDEk1xXnjiHCQE62GHf7smKW5Y1GuBv0to9FbDibE4PLs4TICC3afV8rvNEntnqAk3bTK1z_rLchZEzCplfsiF7dVl1VuQ2DTowuRJ-q0CHoExfyllBpUQ0cy1X1cJQRn0SWJp_U3uE3O66ZYlBuCHdaoCNFrZqP8HyEJInriFlX5atdsz1euXXmDLW7wU1lITAcGgl_ubsBgUhc0REPd4SLJYBlPti2Pz00IHFA-bMbj1_USWJm2MukiEIu2vlqmhgauBzYrqv0tISqj9DR-VaTTzzDoA-k_DC_zy3U7mu_TLHUmD83pzoy1Fw",
+        // The Client ID of the Product from developer.amazon.com
+        "clientId":"amzn1.application-oa2-client.49ac62b58e8444e5976a8f0e250cd8fb",
+        // Product ID from developer.amazon.com
+        "productId":"AVS_Test_Device_4"
+     },
+     "mrm":{
+	    // This is the Amazon ID which you will find on the Developer Portal under the Products section
+	    // of the Alexa Voice Service tab, associated with your device.
+	    "amazonId":"A6AQ4ZK8BGCP3",
+	    // This is the audio device that audio will be rendered to.
+	    "audioPlayerDeviceName":"track:10",
+	    // This is the sample rate you wish to render audio.
+	    "audioPlayerSampleRate":48000,
+	    // This is offset, expressed in nanoseconds, which you wish the audio to render at.
+	    "audioPlayerOffsetDurationNs":340000,
+	    // This is the nominal clock drift of your device, expressed in parts-per-million.
+	    "clockNominalDriftPpm":"0.0",
+	    // This is the clock drift tolerance of your device, expressed in parts-per-million.
+	    "clockDriftTolerancePpm":"20",
+	    // This is the drift of the audio clock from the system clock of your device, expressed in parts-per-million.
+	    "audioClockSystemClockDriftPpm":"0.0"
+    },
+    "capabilitiesDelegate":{
+        // The endpoint to connect in order to send device capabilities.
+        // This will only be used in DEBUG builds.
+        // e.g. "endpoint": "https://api.amazonalexa.com"
+        // Override the message to be sent out to the Capabilities API.
+        // This will only be used in DEBUG builds.
+        // e.g. "overridenCapabilitiesPublishMessageBody": {
+        //          "envelopeVersion":"20160207",
+        //          "capabilities":[
+        //              {
+        //                "type":"AlexaInterface",
+        //                "interface":"Alerts",
+        //                "version":"1.1"
+        //              }
+        //          ]
+        //      }
+    },
+    "miscDatabase":{
+        // Path to misc database file. e.g. /home/ubuntu/Build/miscDatabase.db
+        // Note: The directory specified must be valid.
+        // The database file (miscDatabase.db) will be created by SampleApp, do not create it yourself.
+        "databaseFilePath":"/alexa/miscDatabase.db"
+    },
+   "alertsCapabilityAgent":{
+        // Path to Alerts database file. e.g. /home/ubuntu/Build/alerts.db
+        // Note: The directory specified must be valid.
+        // The database file (alerts.db) will be created by SampleApp, do not create it yourself.
+        // The database file should only be used for alerts (don't use it for other components of SDK)
+        "databaseFilePath":"/alexa/alerts.db"
+   },
+   "settings":{
+        // Path to Settings database file. e.g. /home/ubuntu/Build/settings.db
+        // Note: The directory specified must be valid.
+        // The database file (settings.db) will be created by SampleApp, do not create it yourself.
+        // The database file should only be used for settings (don't use it for other components of SDK)
+        "databaseFilePath":"/alexa/settings.db",
+        "defaultAVSClientSettings":{
+            // Default language for Alexa.
+            // See https://developer.amazon.com/docs/alexa-voice-service/settings.html#settingsupdated for valid values.
+            "locale":"en-US"
+          }
+    },
+    "deviceSettings":{
+        // Path to Device Settings database file. e.g. /home/ubuntu/Build/deviceSettings.db
+        // Note: The directory specified must be valid.
+        // The database file (deviceSettings.db) will be created by SampleApp, do not create it yourself.
+        // The database file should only be used for device settings (don't use it for other components of SDK)
+        "databaseFilePath":"/alexa/deviceSettings.db"
+    },
+    "bluetooth" : {
+        // Path to Bluetooth database file. e.g. /home/ubuntu/Build/bluetooth.db
+        // Note: The directory specified must be valid.
+        // The database file (bluetooth.db) will be created by SampleApp, do not create it yourself.
+        // The database file should only be used for bluetooth (don't use it for other components of SDK)
+        "databaseFilePath":"/alexa/bluetooth.db"
+    },
+   "certifiedSender":{
+        // Path to Certified Sender database file. e.g. /home/ubuntu/Build/certifiedsender.db
+        // Note: The directory specified must be valid.
+        // The database file (certifiedsender.db) will be created by SampleApp, do not create it yourself.
+        // The database file should only be used for certifiedSender (don't use it for other components of SDK)
+        "databaseFilePath":"/alexa/certifiedsender.db"
+    },
+    "notifications":{
+        // Path to Notifications database file. e.g. /home/ubuntu/Build/notifications.db
+        // Note: The directory specified must be valid.
+        // The database file (notifications.db) will be created by SampleApp, do not create it yourself.
+        // The database file should only be used for notifications (don't use it for other components of SDK)
+        "databaseFilePath":"/alexa/notifications.db"
+    },
+    "sampleApp":{
+        // To specify if the SampleApp supports display cards.
+        "displayCardsSupported":true
+    }
+ }

@@ -1,0 +1,13 @@
+diff -urN a/libfstools/rootdisk.c b/libfstools/rootdisk.c
+--- a/libfstools/rootdisk.c	2020-03-05 17:50:18.418985747 +0800
++++ b/libfstools/rootdisk.c	2020-03-05 17:50:53.961909438 +0800
+@@ -137,7 +137,8 @@
+ 		return NULL;
+ 
+ 	if (strstr(rootdev, "mtdblock") ||
+-	    strstr(rootdev, "ubiblock"))
++	    strstr(rootdev, "ubiblock") ||
++	    strstr(rootdev, "dm-"))
+ 		return NULL;
+ 
+ 	if (get_squashfs(&sb))

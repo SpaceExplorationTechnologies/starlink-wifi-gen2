@@ -1,0 +1,47 @@
+From b3bcf2b81806af2a5b13ae0f4ec4f217879501b8 Mon Sep 17 00:00:00 2001
+From: Weijie Gao <weijie.gao@mediatek.com>
+Date: Wed, 7 Nov 2018 15:53:18 +0800
+Subject: [PATCH] serial: 8250_mtk: add support for MT7621
+
+The serial port flag needs UPF_FIXED_TYPE to work on MT7621 platform.
+Also add other flags to make it more suitable for ns16550a.
+
+Signed-off-by: Weijie Gao <weijie.gao@mediatek.com>
+---
+ drivers/tty/serial/8250/8250_mtk.c | 6 ++++--
+ drivers/tty/serial/8250/Kconfig | 3 ++-
+ 2 file changed, 6 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/tty/serial/8250/8250_mtk.c b/drivers/tty/serial/8250/8250_mtk.c
+index c1380bd6..2787e6ed 100644
+--- a/drivers/tty/serial/8250/8250_mtk.c
++++ b/drivers/tty/serial/8250/8250_mtk.c
+@@ -584,8 +584,10 @@ static int mtk8250_probe(struct platform_device *pdev)
+ 	uart.port.mapbase = regs->start;
+ 	uart.port.irq = irq->start;
+ 	uart.port.pm = mtk8250_do_pm;
+-	uart.port.type = PORT_16550;
+-	uart.port.flags = UPF_BOOT_AUTOCONF | UPF_FIXED_PORT;
++	uart.port.type = PORT_16550A;
++	uart.port.flags = UPF_BOOT_AUTOCONF | UPF_FIXED_PORT |
++			  UPF_FIXED_TYPE | UPF_IOREMAP | UPF_SHARE_IRQ |
++			  UPF_SKIP_TEST;
+ 	uart.port.dev = &pdev->dev;
+ 	uart.port.iotype = UPIO_MEM32;
+ 	uart.port.regshift = 2;
+diff --git a/drivers/tty/serial/8250/Kconfig b/drivers/tty/serial/8250/Kconfig
+index 6f4c180a..d8906027 100644
+--- a/drivers/tty/serial/8250/Kconfig
++++ b/drivers/tty/serial/8250/Kconfig
+@@ -347,7 +347,8 @@ config SERIAL_8250_LPC18XX
+ 
+ config SERIAL_8250_MT6577
+ 	bool "Mediatek serial port support"
+-	depends on SERIAL_8250 && ARCH_MEDIATEK
++	depends on SERIAL_8250 && (ARCH_MEDIATEK || RALINK)
++	default n
+ 	help
+ 	  If you have a Mediatek based board and want to use the
+ 	  serial port, say Y to this option. If unsure, say N.
+-- 
+2.18.0

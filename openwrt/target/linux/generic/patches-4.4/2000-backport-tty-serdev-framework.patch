@@ -1,0 +1,24 @@
+diff --git a/drivers/char/Kconfig b/drivers/char/Kconfig
+index 3143db57..c6c5894f 100644
+--- a/drivers/char/Kconfig
++++ b/drivers/char/Kconfig
+@@ -47,6 +47,7 @@ config SGI_MBCS
+          say Y or M here, otherwise say N.
+ 
+ source "drivers/tty/serial/Kconfig"
++source "drivers/tty/serdev/Kconfig"
+ 
+ config TTY_PRINTK
+ 	tristate "TTY driver to output user messages via printk"
+diff --git a/drivers/tty/Makefile b/drivers/tty/Makefile
+index 5817e239..b95bed92 100644
+--- a/drivers/tty/Makefile
++++ b/drivers/tty/Makefile
+@@ -13,6 +13,7 @@ obj-$(CONFIG_R3964)		+= n_r3964.o
+ obj-y				+= vt/
+ obj-$(CONFIG_HVC_DRIVER)	+= hvc/
+ obj-y				+= serial/
++obj-$(CONFIG_SERIAL_DEV_BUS)	+= serdev/
+ 
+ # tty drivers
+ obj-$(CONFIG_AMIGA_BUILTIN_SERIAL) += amiserial.o

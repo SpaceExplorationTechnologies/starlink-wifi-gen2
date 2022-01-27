@@ -1,0 +1,58 @@
+;*****************************************************************************
+;  Copyright Statement:
+;  --------------------
+;  This software is protected by Copyright and the information contained
+;  herein is confidential. The software may not be copied and the information
+;  contained herein may not be used or disclosed except with the written
+;  permission of MediaTek Inc. (C) 2018
+;
+;*****************************************************************************
+;;================================================
+;; PURPOSE:     ASIC normal connection
+;; CREATE_DATE: 2018/04/01
+;; NOTE: dehui.sun@mediatek.com
+
+;;================================================
+; Specify Core Number
+;=================================================
+
+;=================================================
+; Initialize CPU
+;=================================================
+;system.down
+;system.reset
+SYStem.OPTION TRST OFF
+SYSTEM.OPTION ENRESET OFF
+SYSTEM.OPTION RESBREAK OFF
+SYSTEM.OPTION WAITRESET OFF
+
+SYSTEM.JTAGCLOCK 10.MHz;
+
+SYSTEM.CPU CortexA7MPCore
+
+;;Setting Core debug register access
+
+;;;setting Core debug register access
+SYSTEM.CONFIG CORENUMBER 1;
+SYSTEM.MULTICORE COREBASE 0x80810000;
+;SYSTEM.CONFIG CTIBASE 0x80818000;
+;SYSTEM.CONFIG PMUBASE 0x80811000;
+
+SETUP.IMASKHLL ON
+SETUP.IMASKASM ON
+
+;=================================================
+; Attach and Stop CPU
+;=================================================
+;;Must select AXI mode on Memory-Dump-View
+;sys.mode prepare
+;stop
+SYStem.Up
+wait 10.ms
+
+Break.Delete /ALL
+
+;; disable wdt (debug purpose)
+D.S ASD:0x10212000 %LE %LONG 0x22000000
+
+enddo

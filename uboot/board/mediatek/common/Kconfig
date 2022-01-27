@@ -1,0 +1,17 @@
+
+config MEDIATEK_BOOTMENU
+	bool "Enable MediaTek bootmenu framework"
+	select CMD_BOOTMENU
+	default n
+	help
+	  Enable this option will allow boards to use a bootmenu containing
+	  features for easy upgrading/booting.
+
+config MEDIATEK_BOOTMENU_DELAY
+	int "MediaTek bootmenu delay time (s)"
+	range 1 10
+	default 4
+	depends on MEDIATEK_BOOTMENU
+	help
+	  The dealy seconds for the bootmenu to show before running the
+	  default command.

@@ -1,0 +1,27 @@
+#!/bin/sh /etc/rc.common
+# Copyright (C) 2006 OpenWrt.org
+
+. /lib/mediatek.sh
+
+START=99
+
+powerdown_ephy() {
+	#power down port1~port4
+	mii_mgr -s -p 1 -r 0 -v 3900
+	mii_mgr -s -p 2 -r 0 -v 3900
+	mii_mgr -s -p 3 -r 0 -v 3900
+	mii_mgr -s -p 4 -r 0 -v 3900
+}
+
+start() {
+	local board=$(mediatek_board_name)
+
+	case $board in
+	mt7629*)
+		powerdown_ephy
+		;;
+	*)
+		;;
+	esac
+}
+

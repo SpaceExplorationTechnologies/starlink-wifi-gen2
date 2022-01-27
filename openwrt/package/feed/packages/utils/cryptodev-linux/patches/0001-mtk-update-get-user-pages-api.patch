@@ -1,0 +1,11 @@
+--- a/zc.c	2019-05-07 11:29:59.341218705 +0800
++++ b/zc.c	2019-05-07 11:30:16.652668738 +0800
+@@ -60,7 +60,7 @@
+ 
+ 	down_read(&mm->mmap_sem);
+ 	ret = get_user_pages(task, mm,
+-			(unsigned long)addr, pgcount, write, 0, pg, NULL);
++			(unsigned long)addr, pgcount, write, pg, NULL);
+ 	up_read(&mm->mmap_sem);
+ 	if (ret != pgcount)
+ 		return -EINVAL;

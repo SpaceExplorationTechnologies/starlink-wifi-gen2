@@ -1,0 +1,46 @@
+flash.info
+  FLASH_NAME : The FLASH_NAME is composed by "total size in bits" _ "page size in K" _ "spare area size"
+  For example the default NAND flash type is
+		total size = 1Gb(128MB),
+		page size=2K(2048),
+		spare area size=64,
+  then the FLASH_NAME in flash.info is 1Gb_2K_64
+
+  Please check below table for "compatible flash name" mapping to "FLASH_NAME"
+  Page Size  |  Spare Size  |  Total size	 | 	FLASH_NAME	| 	compatible flash name
+  2K(2048)	64		1Gb(128MB)		1Gb_2K_64		W25N01GV, F50L1G41A, MX35LF1GE4AB
+  2K(2048)	128		1Gb(128MB)		1Gb_2K_128		MT29F1G01ABAGD, GD5F1GQ4UX
+  2K(2048)	120		1Gb(256MB)		1Gb_2K_120		EM73C01G44SNB
+  2K(2048)	64		2Gb(256MB)		2Gb_2K_64		W25N02GV, F50L2G41A, MX35LF2G14AC, MX35LF2GE4AB
+  2K(2048)	128		2Gb(256MB)		2Gb_2K_128		EM73D02G44SNA, MT29F2G01ABAGD, GD5F2GQ4UX
+  2K(2048)	128		4Gb(512MB)		4Gb_2K_128		MT29F4G01ADAGD
+  2K(2048)	64		4Gb(512MB)		4Gb_2K_64		GD5F4GQ4UAYIG
+  4K(4096)	256		4Gb(512MB)		4Gb_4K_256		EM73E04G44SNA, TC58CVG2S3HRAIG, GD5F4GQ4UBYIG
+
+mk_single_img.sh
+
+  This script can combine several image into a single image.
+  Then convert this image into a new format which insert spare area/ECC for each page
+  the input file of SPL should be u-boot-spl-no-hdr-tmp.bin, which did not include header,
+  the output file name for single image without ECC is flashimage.bin
+  the outpur file name for single image with ECC is flashimage.ecc
+  Note: please use flashimage.ecc for flash programmer
+
+  The single image is based on MTK's reference partition layout, which is
+	Uboot		0x0~0x100000
+	Config		0x100000~0x140000
+	Factory		0x140000~0x1c0000
+	Kernel		0x1c0000~
+  If your the partition layout is different, please modify mk_single_img.sh.
+
+gen_ecc.sh
+
+  This script can generate ECC for image, the output image can be used by a flash programmer.
+
+mk_header_layout.sh
+
+  This image will add device header and layout, each occupy one page.
+
+sbch:
+version:v1.0.0005
+md5sum: ebdbac7ab5b91ba66cd1b119cb0074ec

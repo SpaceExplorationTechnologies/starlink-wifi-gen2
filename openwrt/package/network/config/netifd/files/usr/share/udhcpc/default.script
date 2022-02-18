@@ -22,7 +22,10 @@ setup_interface() {
 	echo "udhcpc: ifconfig $interface $ip netmask ${subnet:-255.255.255.0} broadcast ${broadcast:-+}"
 	ifconfig $interface $ip netmask ${subnet:-255.255.255.0} broadcast ${broadcast:-+}
 
-	[ -n "$router" ] && [ "$router" != "0.0.0.0" ] && [ "$router" != "255.255.255.255" ] && {
+	eth1_ip="$(ip a s eth1 | egrep -o 'inet [0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | cut -d' ' -f2)"
+	echo "SpaceX: eth1 ip address: $eth1_ip <- If exists, don't overwrite default gateway and resolv.conf"
+	# SpaceX: if there exists a WAN connection, don't overwrite default gateway and resolv.conf
+	[ -z "$eth1_ip" ] && [ -n "$router" ] && [ "$router" != "0.0.0.0" ] && [ "$router" != "255.255.255.255" ] && {
 		echo "udhcpc: setting default routers: $router"
 
 		# SpaceX: for each given gateway, overwrite the default

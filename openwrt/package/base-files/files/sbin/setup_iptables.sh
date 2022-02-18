@@ -61,6 +61,10 @@ if [ ! -f "/tmp/enable_bypass_mode" ]; then
     ipt -A INPUT -i br-lan1 -p udp --dport 67 -j ACCEPT
     ipt -A INPUT -i br-lan2 -p udp --dport 67 -j ACCEPT
     ipt -A INPUT -i br-hiddenlan -p udp --dport 67 -j ACCEPT
+    # Block gRPC commands targeting their own ip address
+    ipt -A INPUT -s 192.168.1.1 -d 192.168.1.1 -p tcp --dport 9002 -j DROP
+    ipt -A INPUT -s 192.168.2.1 -d 192.168.2.1 -p tcp --dport 9002 -j DROP
+    ipt -A INPUT -s 192.168.254.1 -d 192.168.254.1 -p tcp --dport 9002 -j DROP
     # Allow incoming gRPC commands over bridges
     ipt -A INPUT -i br-lan -p tcp --dport 9000:9002 -j ACCEPT
     ipt -A INPUT -i br-lan1 -p tcp --dport 9000:9002 -j ACCEPT
@@ -68,14 +72,22 @@ if [ ! -f "/tmp/enable_bypass_mode" ]; then
     ipt -A INPUT -i br-hiddenlan -p tcp --dport 9002 -j ACCEPT
     # Allow any incoming connections from localhost
     ipt -A INPUT -i lo -j ACCEPT
-    # Allow incoming established or related connections from br-lan
+    # Allow incoming established or related connections from bridges
     ipt -A INPUT -i br-lan -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
     ipt -A INPUT -i br-lan1 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
     ipt -A INPUT -i br-lan2 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+    ipt -A INPUT -i br-hiddenlan -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
     # Allow incoming established or related connections from eth1 (WAN)
     ipt -A INPUT -i eth1 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
 
     # Add FORWARD table rules
+
+    # Allow software update traffic between hiddenlan and WAN
+    ipt -A FORWARD -i br-hiddenlan -o eth1 -p tcp --dport 8001:8002 -j ACCEPT
+    # Allow telemetry between hiddenlan and WAN
+    ipt -A FORWARD -i br-hiddenlan -o eth1 -p tcp --dport 9000 -j ACCEPT
+    # Allow established or related connections from eth1
+    ipt -A FORWARD -i eth1 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
     # Block traffic between hiddenlan and WAN
     ipt -A FORWARD -i br-hiddenlan -o eth1 -j DROP
     ipt -A FORWARD -i eth1 -o br-hiddenlan -j DROP
@@ -83,8 +95,6 @@ if [ ! -f "/tmp/enable_bypass_mode" ]; then
     ipt -A FORWARD -o eth1 -j ACCEPT
     # Allow traffic from localhost
     ipt -A FORWARD -i lo -j ACCEPT
-    # Allow established or related connections from eth1
-    ipt -A FORWARD -i eth1 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
 
     # Add NAT rules. Ipv4 only.
     iptables -t nat -A POSTROUTING -o eth1 -j MASQUERADE

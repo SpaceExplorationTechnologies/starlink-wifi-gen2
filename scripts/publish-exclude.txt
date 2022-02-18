@@ -51,3 +51,6 @@ openwrt/package/mtk/misc/pktgen
 # MTK test prop software
 openwrt/package/mtk/test/firmware_test
 openwrt/package/mtk/test/uevd
+
+# MTK Wifi prop drivers
+openwrt/package/mtk/drivers/mt_wifi/src/mt_wifi

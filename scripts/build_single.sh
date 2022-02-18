@@ -11,7 +11,7 @@
 # 0x00280000 FIP1
 # 0x00480000 Config
 # 0x00500000 Factory Calibration # Not used by our driver
-# 0x00600000 AUTOFUSE string offset
+# 0x00600000 AUTOFUSE string offset (Set in release script rather than at build time)
 # 0x00610000 Starting version record
 # 0x02000000 OpenWRT FIT 0
 # 0x04000000 OpenWRT FIT 1
@@ -38,8 +38,6 @@ dd if="$VERSION/v2-$VERSION-fip.bin" of=$OUT bs=$BLOCK_SIZE seek=8 conv=notrunc
 # Write FIP1 (contains the uboot) to output binary, at 0x280000
 dd if="$VERSION/v2-$VERSION-fip.bin" of=$OUT bs=$BLOCK_SIZE seek=40 conv=notrunc
 
-# Enable autofuse, remove this line to create development single images which do not autofuse.
-echo -n "AUTOFUSE" | dd of=$OUT bs=$BLOCK_SIZE seek=96 conv=notrunc
 # Record version we were built with.
 echo -n "$VERSION" | dd of=$OUT bs=$BLOCK_SIZE seek=97 conv=notrunc
 

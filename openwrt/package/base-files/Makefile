@@ -123,6 +123,8 @@ define Package/base-files/install
 
 	$(VERSION_SED) \
 		$(1)/etc/banner \
+		$(1)/etc/banner.ua \
+		$(1)/etc/banner.repeater \
 		$(1)/etc/openwrt_version \
 		$(1)/usr/lib/os-release
 

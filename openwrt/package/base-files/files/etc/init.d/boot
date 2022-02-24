@@ -41,6 +41,14 @@ boot() {
 	# network subsystems are brought up
 	wifi_control --early_init 2>&1 | head -c 100000 > /tmp/early_init.log
 
+    ################ SpaceX: Enable reverse path filter ################
+	# OpenWrt defaults leaves reverse path filters disabled by default, which
+	# allows LAN clients to spoof WAN addresses and vice versa. Enable on all
+	# interfaces for security and sanity.
+	for interface in /proc/sys/net/ipv4/conf/*/rp_filter; do
+		echo 1 > ${interface}
+	done
+
 	################ SpaceX: Set iptables rules ################
 	/sbin/setup_iptables.sh
 	

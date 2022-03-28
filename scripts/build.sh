@@ -19,6 +19,7 @@ cd "$(dirname "$0")/.."
 export OVERLAY="${OVERLAY:=}"
 export PAYLOAD="${PAYLOAD:=payload}"
 export VERSION="${VERSION:=$(date +%Y-%m-%d)-$(git rev-parse --short HEAD)}"
+export BUILD_BOOTLOADERS="${BUILD_BOOTLOADERS:=0}"
 
 # The anti-rollback version a FIP or BL2 image must be GREATER THAN OR EQUAL TO
 # in order to be allowed to boot.
@@ -36,8 +37,11 @@ mkdir -p "bin/$VERSION"
 
 scripts/inject_payload.sh
 
-scripts/run_in_docker.sh scripts/build_uboot.sh
-scripts/run_in_docker.sh scripts/build_fip.sh
+if [ ${BUILD_BOOTLOADERS} -eq 1 ]; then
+	scripts/run_in_docker.sh scripts/build_uboot.sh
+	scripts/run_in_docker.sh scripts/build_fip.sh
+fi
+
 scripts/run_in_docker.sh scripts/build_openwrt.sh
 scripts/run_in_docker.sh scripts/build_storage.sh
 scripts/run_in_docker.sh scripts/build_upgrade.sh

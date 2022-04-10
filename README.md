@@ -40,7 +40,7 @@ For convenience, `bin/upgrade.bin` is a symlink to the most recent build.
 * `OVERLAY=all` - Enable persistent root filesystem overlay for faster iteration.
 * `PAYLOAD=...` - Use `wifi_control` from a local payload repository. Must already be built.
 * `VERSION=...` - Use a custom version name for this build.
-
+* `BUILD_BOOTLOADERS=1` - Enable bootloaders compilation. Please note that this option requires `keys/fit_key.crt` certificate to sign FIT image.
 
 ## Flashing
 
